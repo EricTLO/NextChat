@@ -161,6 +161,7 @@ export class GeminiProApi implements LLMApi {
         topP: modelConfig.top_p,
         // "topK": modelConfig.top_k,
       },
+      useSearchGrounding: true,
       safetySettings: [
         {
           category: "HARM_CATEGORY_HARASSMENT",
