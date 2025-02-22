@@ -9,10 +9,10 @@ import { GoogleTagManager, GoogleAnalytics } from "@next/third-parties/google";
 import { getServerSideConfig } from "./config/server";
 
 export const metadata: Metadata = {
-  title: "NextChat",
-  description: "Your personal ChatGPT Chat Bot.",
+  title: "NextAIChat",
+  description: "你的个人AI聊天助手 Your personal ChatGPT Chat Bot.",
   appleWebApp: {
-    title: "NextChat",
+    title: "NextAIChat",
     statusBarStyle: "default",
   },
 };
@@ -37,7 +37,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <title>Next.js</title>
+        <title>KKの个人AI</title>
         <meta name="config" content={JSON.stringify(getClientConfig())} />
         <meta
           name="viewport"
