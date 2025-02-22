@@ -61,6 +61,7 @@ export interface RequestPayload {
   }[];
   stream?: boolean;
   model: string;
+  useSearchGrounding: boolean;
   temperature: number;
   presence_penalty: number;
   frequency_penalty: number;
