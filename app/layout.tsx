@@ -7,26 +7,8 @@ import type { Metadata, Viewport } from "next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { GoogleTagManager, GoogleAnalytics } from "@next/third-parties/google";
 import { getServerSideConfig } from "./config/server";
-
+import { SpeedInsights } from '@vercel/speed-insights/next';
 import { Analytics } from '@vercel/analytics/next';
- 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return (
-    <html lang="en">
-      <head>
-        <title>Next.js</title>
-      </head>
-      <body>
-        {children}
-        <Analytics />
-      </body>
-    </html>
-  );
-}
 
 export const metadata: Metadata = {
   title: "NextChat",
@@ -57,6 +39,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        <title>Next.js</title>
         <meta name="config" content={JSON.stringify(getClientConfig())} />
         <meta
           name="viewport"
@@ -71,6 +54,8 @@ export default function RootLayout({
       </head>
       <body>
         {children}
+        <SpeedInsights />
+        <Analytics />
         {serverConfig?.isVercel && (
           <>
             <SpeedInsights />
@@ -86,6 +71,7 @@ export default function RootLayout({
             <GoogleAnalytics gaId={serverConfig.gaId} />
           </>
         )}
+       
       </body>
     </html>
   );
