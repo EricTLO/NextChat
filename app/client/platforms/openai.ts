@@ -54,6 +54,7 @@ export interface OpenAIListModelResponse {
   }>;
 }
 
+
 export interface RequestPayload {
   messages: {
     role: "system" | "user" | "assistant";
@@ -61,7 +62,7 @@ export interface RequestPayload {
   }[];
   stream?: boolean;
   model: string;
-  useSearchGrounding: boolean;
+  useSearchGrounding?: boolean;
   temperature: number;
   presence_penalty: number;
   frequency_penalty: number;
@@ -69,6 +70,9 @@ export interface RequestPayload {
   max_tokens?: number;
   max_completion_tokens?: number;
 }
+
+
+
 
 export interface DalleRequestPayload {
   model: string;
