@@ -111,7 +111,7 @@ async function request(req: NextRequest) {
         req.headers.get("anthropic-version") ||
         serverConfig.anthropicApiVersion ||
         Anthropic.Vision,
-      "Origin": req.headers.get("origin"),
+      "Origin": req.headers.get("origin") ?? "https://ai2.erictlo.com",
     },
     method: req.method,
     body: req.body,
