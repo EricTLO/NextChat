@@ -21,7 +21,15 @@ export async function handle(
   console.log("[Anthropic Route] params ", params);
 
   if (req.method === "OPTIONS") {
-    return NextResponse.json({ body: "OK" }, { status: 200 });
+    return new NextResponse(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Credentials': 'true',
+      'Access-Control-Allow-Origin': '*', 
+      'Access-Control-Allow-Methods': 'GET,OPTIONS,PATCH,DELETE,POST,PUT',
+      'Access-Control-Allow-Headers': 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, anthropic-version, x-api-key',
+    },
+  });
   }
 
   const subpath = params.path.join("/");
@@ -103,6 +111,7 @@ async function request(req: NextRequest) {
         req.headers.get("anthropic-version") ||
         serverConfig.anthropicApiVersion ||
         Anthropic.Vision,
+      "Origin": req.headers.get("origin"),
     },
     method: req.method,
     body: req.body,
