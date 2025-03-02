@@ -1,8 +1,22 @@
 export function prettyObject(msg: any) {
   const obj = msg;
-  if (typeof msg !== "string") {
+  /*if (typeof msg !== "string") {
+    msg = JSON.stringify(msg, null, "  ");
+  }*/
+   if (typeof msg === "string") {
+    try {
+      // 尝试解析 JSON 字符串
+      JSON.parse(msg);
+      // 如果解析成功，说明 msg 已经是 JSON 字符串，不需要再次格式化
+    } catch (error) {
+      // 如果解析失败，说明 msg 不是 JSON 字符串，需要进行格式化
+      msg = JSON.stringify(msg, null, "  ");
+    }
+  } else {
+    // 如果 msg 不是字符串，则将其转换为 JSON 字符串
     msg = JSON.stringify(msg, null, "  ");
   }
+  
   if (msg === "{}") {
     return obj.toString();
   }
