@@ -229,6 +229,8 @@ const cn = {
       AutoSync: {
                 Title: "自动同步",
                 SubTitle: "定期自动同步数据到云端 (WebDAV)",
+                Success: "自动同步成功（每5分钟同步一次）",
+                Fail: "自动同步失败（每5分钟同步一次）",
             },
       Config: {
         Modal: {
