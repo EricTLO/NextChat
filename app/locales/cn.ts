@@ -17,18 +17,7 @@ const cn = {
        \ 3️⃣ 如果你想消耗自己的 OpenAI 资源，点击[这里](/#/settings)修改设置 ⚙️
        `,
   },
-  Settings: {
-        // ...
-        Sync: {
-            // ...
-            AutoSync: {
-                Title: "自动同步",
-                SubTitle: "定期自动同步数据到云端 (WebDAV)",
-            },
-            // ...
-        },
-        // ...
-    },
+  
   Auth: {
     Return: "返回",
     Title: "需要密码",
@@ -237,7 +226,10 @@ const cn = {
       NotSyncYet: "还没有进行过同步",
       Success: "同步成功",
       Fail: "同步失败",
-
+      AutoSync: {
+                Title: "自动同步",
+                SubTitle: "定期自动同步数据到云端 (WebDAV)",
+            },
       Config: {
         Modal: {
           Title: "配置云同步",
