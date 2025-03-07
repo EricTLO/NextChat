@@ -230,6 +230,8 @@ const en: LocaleType = {
       AutoSync: {
                 Title: "Auto Sync",
                 SubTitle: "Periodically sync data to cloud (WebDAV)",
+                Success: "Auto sync successful (sync every 5minutes) ",
+                Fail: "Auto sync failed (sync every 5minutes) ",
             },
       Config: {
         Modal: {
