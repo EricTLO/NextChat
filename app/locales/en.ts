@@ -18,6 +18,18 @@ const en: LocaleType = {
      \ 3️⃣ Want to use your own OpenAI resources? [Click here](/#/settings) to change settings ⚙️
      `,
   },
+  Settings: {
+        // ...
+        Sync: {
+            // ...
+             AutoSync: {
+                Title: "Auto Sync",
+                SubTitle: "Periodically sync data to cloud (WebDAV)",
+            },
+            // ...
+        },
+        // ...
+    },
   Auth: {
     Return: "Return",
     Title: "Need Access Code",
