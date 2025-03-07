@@ -570,9 +570,14 @@ function SyncItems() {
               }}
             />
           </div>
-        </ListItem>
+              </ListItem>
+
+        
+       
+
       </List>
 
+         
       {showSyncConfigModal && (
         <SyncConfigModal onClose={() => setShowSyncConfigModal(false)} />
       )}
@@ -646,6 +651,45 @@ export function Settings() {
   const [shouldShowPromptModal, setShowPromptModal] = useState(false);
 
   const showUsage = accessStore.isAuthorized();
+
+ /*自动同步的代码-------------------------------------（1）在 Settings 组件中添加 autoSyncEnabled 状态和配置项---------------------------------开始----------------------------------*/
+const syncStore = useSyncStore(); //  <--- 确保这行代码在 useEffect 之前，并且在 Settings 组件函数体内
+const [autoSyncEnabled, setAutoSyncEnabled] = useState<boolean>(config.autoSyncEnabled ?? false); // 从 config 中读取初始值，默认为 false
+ useEffect(() => {
+        updateConfig((config) => (config.autoSyncEnabled = autoSyncEnabled)); // 当 autoSyncEnabled 变化时，更新 config
+ }, [autoSyncEnabled, updateConfig]);
+
+
+    useEffect(() => {
+        let intervalId: number | null = null;
+
+        if (autoSyncEnabled) {
+            const syncInterval = 5 * 60 * 1000; // 5 分钟同步一次 (可以根据需要调整)
+
+            const syncData = async () => {
+                try {
+                    await syncStore.sync();
+                    showToast(Locale.Settings.Sync.AutoSync.Success); // 可以添加自动同步成功的提示
+                } catch (e) {
+                    showToast(Locale.Settings.Sync.AutoSync.Fail); // 可以添加自动同步失败的提示
+                    console.error("[Auto Sync]", e);
+                }
+            };
+
+            syncData(); // 立即执行一次同步
+            intervalId = setInterval(syncData, syncInterval) as unknown as number; // 设置定时器，定期同步
+        }
+
+        return () => {
+            if (intervalId) {
+                clearInterval(intervalId); // 清除定时器
+            }
+        };
+    }, [autoSyncEnabled, syncStore]); // 依赖 autoSyncEnabled 和 syncStore
+
+    /*自动同步的代码-------------------------------------（1）在 Settings 组件中添加 autoSyncEnabled 状态和配置项----------------------------------结束------------------------------*/
+
+
   useEffect(() => {
     // checks per minutes
     checkUpdate();
@@ -671,6 +715,33 @@ export function Settings() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+    useEffect(() => {
+        let intervalId: number | null = null;
+
+        if (autoSyncEnabled) {
+            const syncInterval = 5 * 60 * 1000; // 5 分钟同步一次 (可以根据需要调整)
+
+            const syncData = async () => {
+                try {
+                    await syncStore.sync();
+                    showToast(Locale.Settings.Sync.AutoSync.Success); // 可以添加自动同步成功的提示
+                } catch (e) {
+                    showToast(Locale.Settings.Sync.AutoSync.Fail); // 可以添加自动同步失败的提示
+                    console.error("[Auto Sync]", e);
+                }
+            };
+
+            syncData(); // 立即执行一次同步
+            intervalId = setInterval(syncData, syncInterval) as unknown as number; // 设置定时器，定期同步
+        }
+
+        return () => {
+            if (intervalId) {
+                clearInterval(intervalId); // 清除定时器
+            }
+        };
+    }, [autoSyncEnabled, syncStore]); // 依赖 autoSyncEnabled 和 syncStore
 
   const clientConfig = useMemo(() => getClientConfig(), []);
   const showAccessCode = enabledAccessControl && !clientConfig?.isApp;
@@ -1698,7 +1769,22 @@ export function Settings() {
                 )
               }
             ></input>
-          </ListItem>
+                  </ListItem>
+
+
+            <ListItem
+
+                        title={Locale.Settings.Sync.AutoSync.Title} // 需要在 Locale 文件中添加
+                        subTitle={`${Locale.Settings.Sync.AutoSync.SubTitle} [${new Date(syncStore.lastSyncTime).toLocaleString()}] ` } // 需要在 Locale 文件中添加
+            >
+                <input
+                    aria-label={Locale.Settings.Sync.AutoSync.Title}
+                    type="checkbox"
+                    checked={autoSyncEnabled}
+                    onChange={(e) => setAutoSyncEnabled(e.currentTarget.checked)}
+                />
+            </ListItem>
+            
         </List>
 
         <SyncItems />
