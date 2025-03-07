@@ -82,7 +82,8 @@ export const DEFAULT_CONFIG = {
     quality: "standard" as DalleQuality,
     style: "vivid" as DalleStyle,
   },
-
+  autoSyncEnabled: false, 
+  lastSyncTime: 0,      
   ttsConfig: {
     enable: false,
     autoplay: false,
