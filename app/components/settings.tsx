@@ -716,33 +716,6 @@ const [autoSyncEnabled, setAutoSyncEnabled] = useState<boolean>(config.autoSyncE
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-    useEffect(() => {
-        let intervalId: number | null = null;
-
-        if (autoSyncEnabled) {
-            const syncInterval = 5 * 60 * 1000; // 5 分钟同步一次 (可以根据需要调整)
-
-            const syncData = async () => {
-                try {
-                    await syncStore.sync();
-                    showToast(Locale.Settings.Sync.AutoSync.Success); // 可以添加自动同步成功的提示
-                } catch (e) {
-                    showToast(Locale.Settings.Sync.AutoSync.Fail); // 可以添加自动同步失败的提示
-                    console.error("[Auto Sync]", e);
-                }
-            };
-
-            syncData(); // 立即执行一次同步
-            intervalId = setInterval(syncData, syncInterval) as unknown as number; // 设置定时器，定期同步
-        }
-
-        return () => {
-            if (intervalId) {
-                clearInterval(intervalId); // 清除定时器
-            }
-        };
-    }, [autoSyncEnabled, syncStore]); // 依赖 autoSyncEnabled 和 syncStore
-
   const clientConfig = useMemo(() => getClientConfig(), []);
   const showAccessCode = enabledAccessControl && !clientConfig?.isApp;
 
