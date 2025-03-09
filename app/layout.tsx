@@ -53,7 +53,7 @@ export default function RootLayout({
         <script src="/serviceWorkerRegister.js" defer></script>
       </head>
       <body>
-        <AutoSyncProvider>{children}
+        <AutoSyncProvider>
         {children}
         <SpeedInsights />
         {serverConfig?.isVercel && (
