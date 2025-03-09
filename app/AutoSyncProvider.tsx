@@ -1,23 +1,42 @@
 // components/AutoSyncProvider.tsx
 "use client";
-import { useAutoSync } from './config/useAutoSync';
-import React, { useEffect, useCallback } from 'react';
+import { useEffect } from 'react';
+import { useSyncStore } from "./store/sync"; // 假设你的 syncStore 在这里
+import { useAppConfig } from "./store"; // 假设你的 config store 在这里
+import { showToast } from "./components/ui-lib"; // 假设你的 toast 组件在这里
+import Locale from "./locales"; // 假设你的 Locale 文件在这里
 
 export function AutoSyncProvider({ children }: { children: React.ReactNode }) {
-
-  // 使用 useCallback 创建一个记忆化的函数
-  const sync = useCallback(() => {
-    useAutoSync(); // 调用 useAutoSync Hook
-  }, [useAutoSync]); // 依赖项，如果 useAutoSync 发生变化，sync 函数也会重新创建
+  const syncStore = useSyncStore();
+  const config = useAppConfig();
+  const autoSyncEnabled = config.autoSyncEnabled;
 
   useEffect(() => {
-    const intervalId = setInterval(() => {
-      sync(); // 每 5 分钟执行一次 sync 函数
-    }, 5 * 60 * 1000); // 5 分钟 * 60 秒 * 1000 毫秒
+    let intervalId: number | null = null;
 
-    // 组件卸载时清除 interval
-    return () => clearInterval(intervalId);
-  }, [sync]); // 依赖项，如果 sync 函数发生变化，useEffect 也会重新执行
+    if (autoSyncEnabled) {
+      const syncInterval = 5 * 60 * 1000; // 5 分钟
+
+      const syncData = async () => {
+        try {
+          await syncStore.sync();
+          showToast(Locale.Settings.Sync.AutoSync.Success); //  显示成功提示 (可选)
+        } catch (e) {
+          showToast(Locale.Settings.Sync.AutoSync.Fail);    //  显示失败提示 (可选)
+          console.error("[Auto Sync]", e);
+        }
+      };
+
+      syncData(); // 立即执行一次同步
+      intervalId = setInterval(syncData, syncInterval) as unknown as number;
+    }
+
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [autoSyncEnabled, syncStore]);
 
   return <>{children}</>;
 }
