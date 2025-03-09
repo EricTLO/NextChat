@@ -1,4 +1,4 @@
-// hooks/useAutoSync.ts
+/*// hooks/useAutoSync.ts
 import { useEffect } from 'react';
 import { useSyncStore } from "../store/sync"; // 假设你的 syncStore 在这里
 import { useAppConfig } from "../store"; // 假设你的 config store 在这里
@@ -36,4 +36,4 @@ export function useAutoSync() {
             }
         };
     }, [autoSyncEnabled, syncStore]);
-}
+}*/
