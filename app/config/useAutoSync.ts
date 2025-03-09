@@ -1,7 +1,7 @@
 // hooks/useAutoSync.ts
 import { useEffect } from 'react';
-import { useSyncStore } from '@app/store/sync'; // 假设你的 syncStore 在这里
-import { useAppConfig } from '@app/store'; // 假设你的 config store 在这里
+import { useSyncStore } from "../store/sync"; // 假设你的 syncStore 在这里
+import { useAppConfig } from "../store"; // 假设你的 config store 在这里
 import { showToast } from '@/components/ui-lib'; // 假设你的 toast 组件在这里
 import { Locale } from "../locales"; // 假设你的 Locale 文件在这里
 
