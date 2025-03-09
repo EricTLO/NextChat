@@ -53,7 +53,7 @@ export default function RootLayout({
         <script src="/serviceWorkerRegister.js" defer></script>
       </head>
       <body>
-        <AutoSyncProvider>
+        
         {children}
         <SpeedInsights />
         {serverConfig?.isVercel && (
@@ -71,7 +71,7 @@ export default function RootLayout({
             <GoogleAnalytics gaId={serverConfig.gaId} />
           </>
         )}
-       </AutoSyncProvider> {/* 包裹 children */}
+
       </body>
     </html>
   );
