@@ -1,3 +1,4 @@
+/*
 // components/AutoSyncProvider.tsx
 "use client";
 import { useEffect } from 'react';
@@ -40,3 +41,4 @@ export function AutoSyncProvider({ children }: { children: React.ReactNode }) {
 
   return <>{children}</>;
 }
+*/
