@@ -7,6 +7,8 @@ import type { Metadata, Viewport } from "next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { GoogleTagManager, GoogleAnalytics } from "@next/third-parties/google";
 import { getServerSideConfig } from "./config/server";
+// app/layout.tsx
+import { AutoSyncProvider } from './AutoSyncProvider'; // 导入客户端组件
 
 export const metadata: Metadata = {
   title: "NextAIChat",
@@ -51,6 +53,7 @@ export default function RootLayout({
         <script src="/serviceWorkerRegister.js" defer></script>
       </head>
       <body>
+        <AutoSyncProvider>{children}
         {children}
         <SpeedInsights />
         {serverConfig?.isVercel && (
@@ -68,7 +71,7 @@ export default function RootLayout({
             <GoogleAnalytics gaId={serverConfig.gaId} />
           </>
         )}
-       
+       </AutoSyncProvider> {/* 包裹 children */}
       </body>
     </html>
   );
