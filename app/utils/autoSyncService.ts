@@ -1,4 +1,4 @@
-// utils/autoSyncService.ts
+/*// utils/autoSyncService.ts
 import { useSyncStore } from "./store/sync"; // 确保路径正确
 import { useAppConfig } from "./store";     // 确保路径正确
 import { showToast } from "./components/ui-lib"; // 确保路径正确
@@ -42,4 +42,4 @@ export function stopAutoSync() {
         syncIntervalId = null;
         console.log("[AutoSyncService] Global timer stopped."); // 添加日志
     }
-}
+}*/
