@@ -168,7 +168,7 @@ const { autoSyncEnabled: autoSyncEnabledFromConfig, setLastSyncTime } = useAppCo
 const syncStore = useSyncStore();
 const [intervalId, setIntervalId] = useState<number | null>(null);
 const syncInterval = 5 * 60 * 1000; // 同步间隔
-  
+const [isSyncing, setIsSyncing] = useState(false); // 添加同步状态  
 const syncData = useCallback(async () => {
       if (autoSyncEnabledFromConfig && !isSyncing) { // 只有在未同步时才执行
         setIsSyncing(true); // 设置为同步中
