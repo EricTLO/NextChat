@@ -168,18 +168,23 @@ const { autoSyncEnabled: autoSyncEnabledFromConfig, setLastSyncTime } = useAppCo
 const syncStore = useSyncStore();
 const [intervalId, setIntervalId] = useState<number | null>(null);
 const syncInterval = 5 * 60 * 1000; // 同步间隔
+  
 const syncData = useCallback(async () => {
-if (autoSyncEnabledFromConfig) {
-try {
-await syncStore.sync();
-setLastSyncTime(Date.now());
-showToast(Locale.Settings.Sync.AutoSync.Success);
-} catch (e) {
-showToast(Locale.Settings.Sync.AutoSync.Fail);
-console.error("[Auto Sync in Chat]", e);
-}
-}
-}, [syncStore, setLastSyncTime, showToast, Locale, autoSyncEnabledFromConfig]);
+      if (autoSyncEnabledFromConfig && !isSyncing) { // 只有在未同步时才执行
+        setIsSyncing(true); // 设置为同步中
+        try {
+          await syncStore.sync();
+          setLastSyncTime(Date.now());
+          showToast(Locale.Settings.Sync.AutoSync.Success);
+        } catch (e) {
+          showToast(Locale.Settings.Sync.AutoSync.Fail);
+          console.error("[Auto Sync in Chat]", e);
+          console.error("[Auto Sync Error]", e); // 打印完整的错误对象
+        } finally {
+          setIsSyncing(false); // 重置为未同步
+        }
+      }
+    }, [syncStore, setLastSyncTime, showToast, Locale, autoSyncEnabledFromConfig, isSyncing]);
 useEffect(() => {
 if (autoSyncEnabledFromConfig) {
 syncData(); // 立即执行一次
