@@ -8,7 +8,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-
+import { useSyncStore } from "../store/sync"; // -----------------------------------引入 useSyncStore
 import SendWhiteIcon from "../icons/send-white.svg";
 import BrainIcon from "../icons/brain.svg";
 import RenameIcon from "../icons/rename.svg";
@@ -161,6 +161,49 @@ const MCPAction = () => {
     />
   );
 };
+
+// ---------------------------------------------------添加自动同步逻辑---------------------------------------STRAT----------------------------------------
+const AutoSync = () => {
+const { autoSyncEnabled: autoSyncEnabledFromConfig, setLastSyncTime } = useAppConfig();
+const syncStore = useSyncStore();
+const showToast = useToast();
+const Locale = useLocale();
+const [intervalId, setIntervalId] = useState<number | null>(null);
+const syncInterval = 5 * 60 * 1000; // 同步间隔
+const syncData = useCallback(async () => {
+if (autoSyncEnabledFromConfig) {
+try {
+await syncStore.sync();
+setLastSyncTime(Date.now());
+showToast(Locale.Settings.Sync.AutoSync.Success);
+} catch (e) {
+showToast(Locale.Settings.Sync.AutoSync.Fail);
+console.error("[Auto Sync in Chat]", e);
+}
+}
+}, [syncStore, setLastSyncTime, showToast, Locale, autoSyncEnabledFromConfig]);
+useEffect(() => {
+if (autoSyncEnabledFromConfig) {
+syncData(); // 立即执行一次
+const id = setInterval(syncData, syncInterval) as unknown as number;
+setIntervalId(id);
+} else {
+if (intervalId) {
+clearInterval(intervalId);
+setIntervalId(null);
+}
+}
+return () => {
+if (intervalId) {
+clearInterval(intervalId);
+}
+};
+}, [autoSyncEnabledFromConfig, syncData, syncInterval, intervalId]);
+return null; // 这个组件不需要渲染任何 UI
+};
+
+// ---------------------------------------------------添加自动同步逻辑---------------------------------------END----------------------------------------
+
 
 export function SessionConfigModel(props: { onClose: () => void }) {
   const chatStore = useChatStore();
