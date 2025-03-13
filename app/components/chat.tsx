@@ -1205,13 +1205,11 @@ function _Chat() {
     const now = Date.now();
     if (!lastSyncTimeRef.current || now - lastSyncTimeRef.current >= syncInterval) {
       console.log("[DoSubmit] 准备进入开始判定是否满足时间setTimeout！！！！");
-      console.log("[DoSubmit] setTimeout时间满足，执行手动同步！！！执行手动同步！！！执行手动同步！！！！！执行手动同步！！！");
-        
-      
-      setTimeout(() => {         
-       syncStore.sync();
-        console.log("[DoSubmit] setTimeout时间满足，执行手动同步！！！执行手动同步！！！执行手动同步！！！！！执行手动同步！！！");
-       }, syncDelay)
+      console.log("[DoSubmit] setTimeout时间满足，执行手动同步！！！执行手动同步！！！执行手动同步！！！！！执行手动同步！！！");  
+
+      setTimeout(() => {
+         console.log("[DoSubmit] setTimeout时间满足，执行手动同步！！！执行手动同步！！！执行手动同步！！！！！执行手动同步！！！");
+          syncStore.sync()
       .then(() => {
           setLastSyncTime(Date.now())
           lastSyncTimeRef.current = now; // 更新上次同步的时间
@@ -1222,6 +1220,8 @@ function _Chat() {
           console.error("[DoSubmit] 手动同步失败，配置错误！！！！！！", e);
           showToast(Locale.Settings.Sync.AutoSync.Fail);
         });
+         }, syncDelay);
+      
     } else {
       console.log("[DoSubmit] 跳过这次同步， 时间间隔还没到！！！！！");
     }
