@@ -166,8 +166,6 @@ const MCPAction = () => {
 const AutoSync = () => {
 const { autoSyncEnabled: autoSyncEnabledFromConfig, setLastSyncTime } = useAppConfig();
 const syncStore = useSyncStore();
-const showToast = useToast();
-const Locale = useLocale();
 const [intervalId, setIntervalId] = useState<number | null>(null);
 const syncInterval = 5 * 60 * 1000; // 同步间隔
 const syncData = useCallback(async () => {
