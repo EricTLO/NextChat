@@ -1199,6 +1199,7 @@ function _Chat() {
     setAutoScroll(true);
   // ---------------------------------------------------添加自动同步逻辑---------------------------------------STRAT----------------------------------------
   // 检查是否需要同步
+    const syncStore = useSyncStore();
     const now = Date.now();
     if (!lastSyncTimeRef.current || now - lastSyncTimeRef.current >= syncInterval) {
       console.log("[DoSubmit] 执行手动同步！！！执行手动同步！！！执行手动同步！！！！！执行手动同步！！！");
