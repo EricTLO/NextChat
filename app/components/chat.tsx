@@ -1205,15 +1205,16 @@ function _Chat() {
     const now = Date.now();
     if (!lastSyncTimeRef.current || now - lastSyncTimeRef.current >= syncInterval) {
       console.log("[DoSubmit] 准备进入开始判定是否满足时间setTimeout！！！！");
-        syncStore.sync()        
-     console.log("[DoSubmit] setTimeout时间满足，执行手动同步！！！执行手动同步！！！执行手动同步！！！！！执行手动同步！！！");
-       .then(() => {
+      console.log("[DoSubmit] setTimeout时间满足，执行手动同步！！！执行手动同步！！！执行手动同步！！！！！执行手动同步！！！");
+        
+      syncStore.sync()
+      .then(() => {
           setLastSyncTime(Date.now())
           lastSyncTimeRef.current = now; // 更新上次同步的时间
           showToast(Locale.Settings.Sync.AutoSync.Success);
           console.log("[DoSubmit] 更新时间同步成功");
         })
-        .catch((e) => {
+      .catch((e) => {
           console.error("[DoSubmit] 手动同步失败，配置错误！！！！！！", e);
           showToast(Locale.Settings.Sync.AutoSync.Fail);
         });
