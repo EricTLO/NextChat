@@ -164,46 +164,63 @@ const MCPAction = () => {
 
 // ---------------------------------------------------添加自动同步逻辑---------------------------------------STRAT----------------------------------------
 const AutoSync = () => {
-const { autoSyncEnabled: autoSyncEnabledFromConfig, setLastSyncTime } = useAppConfig();
-const syncStore = useSyncStore();
-const [intervalId, setIntervalId] = useState<number | null>(null);
-const syncInterval = 5 * 60 * 1000; // 同步间隔
-const [isSyncing, setIsSyncing] = useState(false); // 添加同步状态  
-const syncData = useCallback(async () => {
-      if (autoSyncEnabledFromConfig && !isSyncing) { // 只有在未同步时才执行
-        setIsSyncing(true); // 设置为同步中
-        try {
-          await syncStore.sync();
-          setLastSyncTime(Date.now());
-          showToast(Locale.Settings.Sync.AutoSync.Success);
-        } catch (e) {
-          showToast(Locale.Settings.Sync.AutoSync.Fail);
-          console.error("[Auto Sync in Chat]", e);
-          console.error("[Auto Sync Error]", e); // 打印完整的错误对象
-        } finally {
-          setIsSyncing(false); // 重置为未同步
-        }
+  const { autoSyncEnabled: autoSyncEnabledFromConfig, setLastSyncTime } = useAppConfig();
+  const syncStore = useSyncStore();
+  const showToast = useToast();
+  const Locale = useLocale();
+  const [intervalId, setIntervalId] = useState<number | null>(null);
+  const syncInterval = 5 * 60 * 1000; // 同步间隔
+  const [isSyncing, setIsSyncing] = useState(false); // 添加同步状态
+  const autoSyncEnabledRef = useRef(autoSyncEnabledFromConfig); // 使用 useRef 保存 autoSyncEnabled
+     
+   useEffect(() => {
+     autoSyncEnabledRef.current = autoSyncEnabledFromConfig; // 当 autoSyncEnabledFromConfig 变化时，更新 ref
+   }, [autoSyncEnabledFromConfig]);
+
+  const syncData = useCallback(async () => {
+    if (autoSyncEnabledRef.current && !isSyncing) {  // 读取 ref 对象的值
+      setIsSyncing(true);
+      try {
+        console.log("[AutoSync] Syncing data...");
+        await syncStore.sync();
+        setLastSyncTime(Date.now());
+        showToast(Locale.Settings.Sync.AutoSync.Success);
+        console.log("[AutoSync] Sync successful");
+      } catch (e) {
+        showToast(Locale.Settings.Sync.AutoSync.Fail);
+        console.error("[Auto Sync in Chat]", e);
+        console.error("[Auto Sync Error]", e);
+      } finally {
+        setIsSyncing(false);
+        console.log("[AutoSync] Sync complete");
       }
-    }, [syncStore, setLastSyncTime, showToast, Locale, autoSyncEnabledFromConfig, isSyncing]);
-useEffect(() => {
-if (autoSyncEnabledFromConfig) {
-syncData(); // 立即执行一次
-const id = setInterval(syncData, syncInterval) as unknown as number;
-setIntervalId(id);
-} else {
-if (intervalId) {
-clearInterval(intervalId);
-setIntervalId(null);
-}
-}
-return () => {
-if (intervalId) {
-clearInterval(intervalId);
-}
+    } else {
+      console.log("[AutoSync] Skipped sync, already syncing or disabled");
+    }
+  }, [syncStore, setLastSyncTime, showToast, Locale,  isSyncing]); // 移除 autoSyncEnabledRef
+
+  useEffect(() => {
+    if (autoSyncEnabledRef.current) { // 读取 ref 对象的值
+      syncData(); // 立即执行一次
+      const id = setInterval(syncData, syncInterval) as unknown as number;
+      setIntervalId(id);
+    } else {
+      if (intervalId) {
+        clearInterval(intervalId);
+        setIntervalId(null);
+      }
+    }
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [ syncData, syncInterval, intervalId]);  // 移除 autoSyncEnabledRef
+
+  return null;
 };
-}, [autoSyncEnabledFromConfig, syncData, syncInterval, intervalId]);
-return null; // 这个组件不需要渲染任何 UI
-};
+
+export default AutoSync;
 
 // ---------------------------------------------------添加自动同步逻辑---------------------------------------END----------------------------------------
 
