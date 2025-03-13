@@ -167,7 +167,7 @@ const AutoSync = () => {
   const { autoSyncEnabled: autoSyncEnabledFromConfig, setLastSyncTime } = useAppConfig();
   const syncStore = useSyncStore();
   const [intervalId, setIntervalId] = useState<number | null>(null);
-  const syncInterval = 5 * 60 * 1000; // 同步间隔
+  const syncInterval = 300000; // 同步间隔
   const [isSyncing, setIsSyncing] = useState(false); // 添加同步状态
   const autoSyncEnabledRef = useRef(autoSyncEnabledFromConfig); // 使用 useRef 保存 autoSyncEnabled
      
@@ -183,7 +183,7 @@ const AutoSync = () => {
         await syncStore.sync();
         setLastSyncTime(Date.now());
         showToast(Locale.Settings.Sync.AutoSync.Success);
-        console.log("[AutoSync] Sync successful");
+        console.log("[AutoSync] Sync successful 执行自动同步成功！！！！！！！！！！！！！！");
       } catch (e) {
         showToast(Locale.Settings.Sync.AutoSync.Fail);
         console.error("[Auto Sync in Chat]", e);
@@ -199,18 +199,21 @@ const AutoSync = () => {
 
   useEffect(() => {
     if (autoSyncEnabledRef.current) { // 读取 ref 对象的值
-      syncData(); // 立即执行一次
+      
       const id = setInterval(syncData, syncInterval) as unknown as number;
       setIntervalId(id);
+      console.log("set interval id:"+id)
     } else {
       if (intervalId) {
         clearInterval(intervalId);
         setIntervalId(null);
       }
+      console.log("clear interval id")
     }
     return () => {
       if (intervalId) {
         clearInterval(intervalId);
+        console.log("clear interval id:"+intervalId)
       }
     };
   }, [ syncData, syncInterval, intervalId]);  // 移除 autoSyncEnabledRef
