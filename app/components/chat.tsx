@@ -163,7 +163,7 @@ const MCPAction = () => {
 };
 
 // ---------------------------------------------------添加自动同步逻辑---------------------------------------STRAT----------------------------------------
-const AutoSync = () => {
+/*const AutoSync = () => {
   const { autoSyncEnabled: autoSyncEnabledFromConfig, setLastSyncTime } = useAppConfig();
   
   const syncStore = useSyncStore();
@@ -202,12 +202,15 @@ const AutoSync = () => {
 
   useEffect(() => {
     console.log("useEffect 执行！！！！！！！！！！！！！！！！！！！！！！"); // 确认 useEffect 是否频繁执行
-    if (autoSyncEnabledRef.current) {
+    if (autoSyncEnabledRef.current && !intervalId)
+    {
       syncData(); // 立即执行一次
       const id = setInterval(syncData, syncInterval) as unknown as number;
       setIntervalId(id);
       console.log("！！！！！！！！！！！！！！set interval id:", id);
-    } else {
+    } 
+    else 
+    {
       if (intervalId) {
         clearInterval(intervalId);
         setIntervalId(null);
@@ -225,7 +228,7 @@ const AutoSync = () => {
   return null;
 };
 
-export default AutoSync;
+export default AutoSync;*/
 
 // ---------------------------------------------------添加自动同步逻辑---------------------------------------END----------------------------------------
 
@@ -901,7 +904,7 @@ export function ChatActions(props: {
           />
         )}
         {!isMobileScreen && <MCPAction />}
-        <AutoSync /> {/* 放置自动同步组件 */}
+        
       </>
       <div className={styles["chat-input-actions-end"]}>
         {config.realtimeConfig.enable && (
@@ -1171,6 +1174,10 @@ function _Chat() {
     }
   };
 
+  
+  const lastSyncTimeRef = useRef<number | null>(null); // 存储上次同步的时间
+  const syncInterval = 1 * 10 * 1000; // 5 分钟
+  
   const doSubmit = (userInput: string) => {
     if (userInput.trim() === "" && isEmpty(attachImages)) return;
     const matchCommand = chatCommands.match(userInput);
@@ -1190,6 +1197,32 @@ function _Chat() {
     setPromptHints([]);
     if (!isMobileScreen) inputRef.current?.focus();
     setAutoScroll(true);
+  // ---------------------------------------------------添加自动同步逻辑---------------------------------------STRAT----------------------------------------
+  // 检查是否需要同步
+    const now = Date.now();
+    if (!lastSyncTimeRef.current || now - lastSyncTimeRef.current >= syncInterval) {
+      console.log("[DoSubmit] 执行手动同步！！！执行手动同步！！！执行手动同步！！！！！执行手动同步！！！");
+      syncStore.sync()
+       .then(() => {
+          setLastSyncTime(Date.now())
+          lastSyncTimeRef.current = now; // 更新上次同步的时间
+          showToast(Locale.Settings.Sync.AutoSync.Success);
+        })
+        .catch((e) => {
+          console.error("[DoSubmit] 手动同步失败，配置错误！！！！！！", e);
+          showToast(Locale.Settings.Sync.AutoSync.Fail);
+        });
+    } else {
+      console.log("[DoSubmit] 跳过这次同步， 时间间隔还没到！！！！！");
+    }
+
+
+
+
+
+
+  // ---------------------------------------------------添加自动同步逻辑---------------------------------------END----------------------------------------
+
   };
 
   const onPromptSelect = (prompt: RenderPrompt) => {
