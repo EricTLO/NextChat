@@ -165,15 +165,17 @@ const MCPAction = () => {
 // ---------------------------------------------------添加自动同步逻辑---------------------------------------STRAT----------------------------------------
 const AutoSync = () => {
   const { autoSyncEnabled: autoSyncEnabledFromConfig, setLastSyncTime } = useAppConfig();
+  
   const syncStore = useSyncStore();
   const [intervalId, setIntervalId] = useState<number | null>(null);
-  const syncInterval = 5 * 60 * 1000; // 同步间隔
+  const syncInterval = 1 * 10 * 1000; // 同步间隔
   const [isSyncing, setIsSyncing] = useState(false); // 添加同步状态
   const autoSyncEnabledRef = useRef(autoSyncEnabledFromConfig); // 使用 useRef 保存 autoSyncEnabled
 
   useEffect(() => {
     autoSyncEnabledRef.current = autoSyncEnabledFromConfig; // 当 autoSyncEnabledFromConfig 变化时，更新 ref
-    console.log("autoSyncEnabledFromConfig 变化:", autoSyncEnabledFromConfig); // 观察 autoSyncEnabledFromConfig 的变化
+    
+    console.log("autoSyncEnabledFromConfig 变化？？？？？？？？？？？？？:", autoSyncEnabledFromConfig); // 观察 autoSyncEnabledFromConfig 的变化
   }, [autoSyncEnabledFromConfig]);
 
   const syncData = useCallback(async () => {
@@ -183,12 +185,12 @@ const AutoSync = () => {
         console.log("[AutoSync] Syncing data...");
         await syncStore.sync();
         setLastSyncTime(Date.now());
-        showToast(Locale.Settings.Sync.AutoSync.Success);
-        console.log("[AutoSync] Sync successful");
+        //showToast(Locale.Settings.Sync.AutoSync.Success);
+        console.log("[AutoSync] Sync successful！！！！！！！！");
       } catch (e) {
-        showToast(Locale.Settings.Sync.AutoSync.Fail);
-        console.error("[Auto Sync in Chat]", e);
-        console.error("[Auto Sync Error]", e);
+        //showToast(Locale.Settings.Sync.AutoSync.Fail);
+        console.error("[Auto Sync in Chat]！！！！！！！！！！！！！！！！！", e);
+        console.error("[Auto Sync Error]！！！！！！！！！！！！！！！！！！！", e);
       } finally {
         setIsSyncing(false);
         console.log("[AutoSync] Sync complete！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！");
@@ -196,7 +198,7 @@ const AutoSync = () => {
     } else {
       console.log("[AutoSync] Skipped sync, already syncing or disabled！！！！！！！！！！！！！！！！！！！！！！！！！");
     }
-  }, [syncStore, setLastSyncTime, showToast, Locale, isSyncing]);
+  }, [syncStore, setLastSyncTime, isSyncing]);
 
   useEffect(() => {
     console.log("useEffect 执行！！！！！！！！！！！！！！！！！！！！！！"); // 确认 useEffect 是否频繁执行
