@@ -1177,7 +1177,7 @@ function _Chat() {
   
   const lastSyncTimeRef = useRef<number | null>(null); // 存储上次同步的时间
   const syncInterval = 1 * 10 * 1000; // 5 分钟
-  
+  const syncStore = useSyncStore();
   const doSubmit = (userInput: string) => {
     if (userInput.trim() === "" && isEmpty(attachImages)) return;
     const matchCommand = chatCommands.match(userInput);
@@ -1199,7 +1199,7 @@ function _Chat() {
     setAutoScroll(true);
   // ---------------------------------------------------添加自动同步逻辑---------------------------------------STRAT----------------------------------------
   // 检查是否需要同步
-    const syncStore = useSyncStore();
+    
     const now = Date.now();
     if (!lastSyncTimeRef.current || now - lastSyncTimeRef.current >= syncInterval) {
       console.log("[DoSubmit] 执行手动同步！！！执行手动同步！！！执行手动同步！！！！！执行手动同步！！！");
