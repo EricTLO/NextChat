@@ -191,7 +191,21 @@ export const useAppConfig = createPersistStore(
         models: Object.values(modelMap),
       }));
     },
+  //手动添加 setAutoSyncEnabled 和 setLastSyncTime 这两个函数。这两个函数会使用 set 方法来更新 store 中的 autoSyncEnabled 和 lastSyncTime 状态。 【↓START】
+  setAutoSyncEnabled: (enabled: boolean) => {
+    set((state) => ({
+      ...state,
+      autoSyncEnabled: enabled,
+    }));
+  },
 
+  setLastSyncTime: (time: number) => {
+    set((state) => ({
+      ...state,
+      lastSyncTime: time,
+    }));
+  },
+  //手动添加 setAutoSyncEnabled 和 setLastSyncTime 这两个函数。这两个函数会使用 set 方法来更新 store 中的 autoSyncEnabled 和 lastSyncTime 状态。【↑END】
     allModels() {},
   }),
   {
