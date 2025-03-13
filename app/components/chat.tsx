@@ -1207,7 +1207,11 @@ function _Chat() {
       console.log("[DoSubmit] 准备进入开始判定是否满足时间setTimeout！！！！");
       console.log("[DoSubmit] setTimeout时间满足，执行手动同步！！！执行手动同步！！！执行手动同步！！！！！执行手动同步！！！");
         
-      syncStore.sync()
+      
+      setTimeout(() => {         
+       syncStore.sync();
+        console.log("[DoSubmit] setTimeout时间满足，执行手动同步！！！执行手动同步！！！执行手动同步！！！！！执行手动同步！！！");
+       }, syncDelay)
       .then(() => {
           setLastSyncTime(Date.now())
           lastSyncTimeRef.current = now; // 更新上次同步的时间
