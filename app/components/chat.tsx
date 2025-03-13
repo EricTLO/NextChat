@@ -1205,7 +1205,7 @@ function _Chat() {
     const now = Date.now();
     if (!lastSyncTimeRef.current || now - lastSyncTimeRef.current >= syncInterval) {
       console.log("[DoSubmit] 准备进入开始判定是否满足时间setTimeout！！！！");
-        syncStore.sync();        
+        syncStore.sync()        
      console.log("[DoSubmit] setTimeout时间满足，执行手动同步！！！执行手动同步！！！执行手动同步！！！！！执行手动同步！！！");
        .then(() => {
           setLastSyncTime(Date.now())
