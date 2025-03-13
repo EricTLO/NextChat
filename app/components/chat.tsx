@@ -1178,6 +1178,7 @@ function _Chat() {
   const lastSyncTimeRef = useRef<number | null>(null); // 存储上次同步的时间
   const syncInterval = 1 * 10 * 1000; // 5 分钟
   const syncStore = useSyncStore();
+  const { autoSyncEnabled: autoSyncEnabledFromConfig, setLastSyncTime } = useAppConfig();
   const doSubmit = (userInput: string) => {
     if (userInput.trim() === "" && isEmpty(attachImages)) return;
     const matchCommand = chatCommands.match(userInput);
