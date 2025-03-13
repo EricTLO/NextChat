@@ -1206,10 +1206,10 @@ function _Chat() {
     if (!lastSyncTimeRef.current || now - lastSyncTimeRef.current >= syncInterval) {
       console.log("[DoSubmit] 准备进入开始判定是否满足时间setTimeout！！！！");
       setTimeout(() => {
-         console.log("[DoSubmit] setTimeout时间满足，执行手动同步！！！执行手动同步！！！执行手动同步！！！！！执行手动同步！！！");
         syncStore.sync();
         }, syncDelay);
       });
+     console.log("[DoSubmit] setTimeout时间满足，执行手动同步！！！执行手动同步！！！执行手动同步！！！！！执行手动同步！！！");
        .then(() => {
           setLastSyncTime(Date.now())
           lastSyncTimeRef.current = now; // 更新上次同步的时间
