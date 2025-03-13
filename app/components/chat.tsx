@@ -876,6 +876,7 @@ export function ChatActions(props: {
           />
         )}
         {!isMobileScreen && <MCPAction />}
+        <AutoSync /> {/* 放置自动同步组件 */}
       </>
       <div className={styles["chat-input-actions-end"]}>
         {config.realtimeConfig.enable && (
