@@ -661,6 +661,16 @@ export const useChatStore = createPersistStore(
         });
       },
 
+      filterSessionsWithoutImages(sessions: ChatSession[]): ChatSession[] {
+      return sessions.map((session) => ({
+        ...session,
+        messages: session.messages.filter(
+          (message) => !/<img.*?>/.test(message.content), // 移除包含 img 标签的消息
+        ),
+      }));
+    },
+
+      
       summarizeSession(
         refreshTitle: boolean = false,
         targetSession: ChatSession,
