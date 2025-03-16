@@ -12,6 +12,30 @@ export function createWebDavClient(store: SyncStore) {
     store.useProxy && store.proxyUrl.length > 0 ? store.proxyUrl : undefined;
 
   return {
+    //这是新的方法
+    async check() {
+    try {
+      const res = await fetch(this.path(folder, proxyUrl, "PROPFIND"), {
+        method: "PROPFIND", // 使用 PROPFIND 方法
+        headers: this.headers(),
+      });  
+  
+      const success = [207, 200, 401, 403].includes(res.status); // 常见的 WebDAV 成功状态码和认证状态码
+      console.log(
+        `[WebDav] check ${success ? "success" : "failed"}, ${res.status} ${
+          res.statusText
+        }`,
+      );
+      return success;
+    } catch (e) {
+      console.error("[WebDav] 检查失败，无法连接成功", e);
+    }
+
+
+  return false;
+}
+    
+    /*
     async check() {
       try {
         const res = await fetch(this.path(folder, proxyUrl, "MKCOL"), {
@@ -32,7 +56,7 @@ export function createWebDavClient(store: SyncStore) {
       }
 
       return false;
-    },
+    },*///这是原来的的方法
 
     async get(key: string) {
       const res = await fetch(this.path(fileName, proxyUrl), {
