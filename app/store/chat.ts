@@ -232,6 +232,16 @@ const DEFAULT_CHAT_STATE = {
 export const useChatStore = createPersistStore(
   DEFAULT_CHAT_STATE,
   (set, _get) => {
+     // 过滤包含图片信息的会话
+    filterSessionsWithoutImages(sessions: ChatSession[]): ChatSession[] {
+      return sessions.map((session) => ({
+        ...session,
+        messages: session.messages.filter(
+          (message) => !/<img.*?>/.test(message.content), // 移除包含 img 标签的消息
+        ),
+      }));
+    },
+    
     function get() {
       return {
         ..._get(),
