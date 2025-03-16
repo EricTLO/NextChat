@@ -12,8 +12,9 @@ export function createWebDavClient(store: SyncStore) {
     store.useProxy && store.proxyUrl.length > 0 ? store.proxyUrl : undefined;
 
   return {
+    
     //这是新的方法
-    async check() {
+    /*async check() {
     try {
       const res = await fetch(this.path(folder, proxyUrl, "PROPFIND"), {
         method: "PROPFIND", // 使用 PROPFIND 方法
@@ -33,9 +34,10 @@ export function createWebDavClient(store: SyncStore) {
 
 
   return false;
-},
+},*/
+
     
-    /*
+    //这是原来的的方法
     async check() {
       try {
         const res = await fetch(this.path(folder, proxyUrl, "MKCOL"), {
@@ -56,7 +58,7 @@ export function createWebDavClient(store: SyncStore) {
       }
 
       return false;
-    },*///这是原来的的方法
+    },//这是原来的的方法
 
     async get(key: string) {
       const res = await fetch(this.path(fileName, proxyUrl), {
