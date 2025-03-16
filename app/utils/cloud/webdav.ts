@@ -33,7 +33,7 @@ export function createWebDavClient(store: SyncStore) {
 
 
   return false;
-}
+},
     
     /*
     async check() {
