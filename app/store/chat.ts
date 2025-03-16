@@ -661,14 +661,22 @@ export const useChatStore = createPersistStore(
         });
       },
 
-      filterSessionsWithoutImages(sessions: ChatSession[]): ChatSession[] {
-      return sessions.map((session) => ({
-        ...session,
-        messages: session.messages.filter(
-          (message) => !/<img.*?>/.test(message.content), // 移除包含 img 标签的消息
-        ),
-      }));
-    },
+     filterSessionsWithoutImages(sessions: ChatSession[]): ChatSession[] {
+  return sessions.map((session) => ({
+    ...session,
+    messages: session.messages.filter((message) => {
+      if (typeof message.content === "string") {
+        return !/<img.*?>/.test(message.content); // 移除包含 img 标签的消息
+      } else if (Array.isArray(message.content)) {
+        // 如果是多模态内容，只保留文本类型的内容
+        return message.content.every(
+          (item) => item.type !== "image_url",
+        );
+      }
+      return true; // 保留其他类型的消息
+    }),
+  }));
+},
 
       
       summarizeSession(
