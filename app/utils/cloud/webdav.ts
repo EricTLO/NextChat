@@ -50,6 +50,13 @@ export function createWebDavClient(store: SyncStore) {
     },
 
     async set(key: string, value: string) {
+
+     const fileSize = new Blob([value]).size;
+      if (fileSize > 500 * 1024 * 1024) { // 500MB
+        console.error("文件大小超过500MB，无法上传");
+        return;
+      }
+
       const res = await fetch(this.path(fileName, proxyUrl), {
         method: "PUT",
         headers: this.headers(),
