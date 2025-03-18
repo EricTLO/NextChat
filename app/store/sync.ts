@@ -108,13 +108,13 @@ export const useSyncStore = createPersistStore(
           }
   
           // 2. 添加延迟，确保服务器完成文件组合 (例如 1 秒)
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          await new Promise(resolve => setTimeout(resolve, 5000));
   
           // 3. 从云端获取远程状态
           const remoteState = await client.get(config.username);
   
           if (!remoteState || remoteState === "") {
-              console.log("[Sync] Remote state is empty.");
+              console.log("[Sync] Remote state is empty 远程状态为空.");
               return;
           } else {
               const parsedRemoteState = JSON.parse(remoteState) as AppState;
