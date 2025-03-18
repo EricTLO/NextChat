@@ -110,7 +110,7 @@ export const useSyncStore = createPersistStore(
 
         // 2. 添加延迟，确保服务器完成文件组合 (例如 1 秒)
         console.log("[Sync] 等待 1 秒...");
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise(resolve => setTimeout(resolve, 3000));
         console.log("[Sync] 1 秒等待完成.");
 
         // 3. 从云端获取远程状态
@@ -123,10 +123,22 @@ export const useSyncStore = createPersistStore(
             return;
         } else {
             console.log("[Sync] 远程状态不为空，尝试解析 JSON...");
+            console.log("Raw remoteState:", remoteState); // 添加这行代码
+            try {
+                const parsedRemoteState = JSON.parse(remoteState) as AppState;
+                console.log("[Sync] 成功解析 JSON.");
+                mergeAppState(localState, parsedRemoteState);
+                setLocalAppState(localState);
+            } catch (parseError) {
+                console.error("[Sync] Failed to parse remote state:解析失败了！！！！解析失败了！！！！解析失败了！！！！解析失败了！！！！", parseError);
+            }
+
+
+            /*
             const parsedRemoteState = JSON.parse(remoteState) as AppState;
             console.log("[Sync] 成功解析 JSON.");
             mergeAppState(localState, parsedRemoteState);
-            setLocalAppState(localState);
+            setLocalAppState(localState);*/
         }
     } catch (e) {
         console.log("[Sync] sync failed", e);
