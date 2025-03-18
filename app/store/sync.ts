@@ -126,9 +126,43 @@ export const useSyncStore = createPersistStore(
   const client = this.getClient();
 
   try {
-    // 1. 上传本地状态到云端
+      // 1. 从云端获取远程状态，合并本地
+    console.log("[Sync] 先开始从云端获取远程状态...");
+    let remoteState = await client.get(config.username);
+    console.log("[Sync] 成功从云端获取远程状态.");
+
+    if (!remoteState || remoteState === "") {
+      console.log("[Sync] Remote state is empty 远程是空的，建立初始文件.");
+      await client.set(config.username, JSON.stringify(localState));
+      return;
+    } else {
+      console.log("[Sync] 远程状态不为空，尝试解析 JSON...");
+      console.log("Raw remoteState:", remoteState); // 添加这行代码
+       try {
+          const decompressedValue = await decompress(Buffer.from(remoteState, 'latin1')); // 解压数据 (从latin1解码)
+          console.log("[Sync] 云端下载解压缩回来之后localState的内容-粗版", decompressedValue); // 添加这行代码！
+          const parsedRemoteState = JSON.parse(decompressedValue) as AppState; // 解析 JSON
+           console.log("[Sync] 等待 1 秒...");
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            console.log("[Sync] 1 秒等待完成.");
+
+           console.log("[Sync] 云端下载解压缩回来之后localState的内容-细版", parsedRemoteState); // 添加这行代码！
+          console.log("[Sync] 成功解析 JSON.");
+          mergeAppState(localState, parsedRemoteState);
+         console.log("[Sync] 成功mergeAppState JSON.");
+          setLocalAppState(localState);
+         console.log("[Sync] 成功setLocalAppState JSON.");
+      } catch (parseError) {
+          console.error("[Sync] Failed to parse remote state:解析失败了！！！！解析失败了！！！！解析失败了！！！！解析失败了！！！！", parseError);
+      }
+    }
+
+
+
+    
+    // 2. 再上传本地状态到云端
     try {
-      console.log("[Sync] 开始上传本地状态到云端...");
+      console.log("[Sync] 开始上传本地合并后的状态到云端...");
       console.log("[Sync] localState的内容", localState); // 添加这行代码！
       const jsonString = JSON.stringify(localState); // 转换为 JSON 字符串
       const compressedData = await compress(jsonString); // 压缩数据
@@ -140,36 +174,13 @@ export const useSyncStore = createPersistStore(
       throw uploadError; // 抛出错误，阻止后续操作
     }
 
-    // 2. 添加延迟，确保服务器完成文件组合 (例如 1 秒)
-    console.log("[Sync] 等待 1 秒...");
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    console.log("[Sync] 1 秒等待完成.");
-
-    // 3. 从云端获取远程状态
-    console.log("[Sync] 开始从云端获取远程状态...");
-    let remoteState = await client.get(config.username);
-    console.log("[Sync] 成功从云端获取远程状态.");
-
-    if (!remoteState || remoteState === "") {
-      console.log("[Sync] Remote state is empty.");
-      return;
-    } else {
-      console.log("[Sync] 远程状态不为空，尝试解析 JSON...");
-      console.log("Raw remoteState:", remoteState); // 添加这行代码
-       try {
-          const decompressedValue = await decompress(Buffer.from(remoteState, 'latin1')); // 解压数据 (从latin1解码)
-          console.log("[Sync] 云端下载解压缩回来之后localState的内容-粗版", decompressedValue); // 添加这行代码！
-          const parsedRemoteState = JSON.parse(decompressedValue) as AppState; // 解析 JSON
-           console.log("[Sync] 云端下载解压缩回来之后localState的内容-细版", parsedRemoteState); // 添加这行代码！
-          console.log("[Sync] 成功解析 JSON.");
-          mergeAppState(localState, parsedRemoteState);
-          setLocalAppState(localState);
-      } catch (parseError) {
-          console.error("[Sync] Failed to parse remote state:解析失败了！！！！解析失败了！！！！解析失败了！！！！解析失败了！！！！", parseError);
-      }
-    }
+    // 3. 添加延迟，确保服务器完成文件组合 (例如 1 秒)
+    console.log("[Sync] 等待 0.1 秒...");
+    await new Promise(resolve => setTimeout(resolve, 100));
+    console.log("[Sync] 0.1 秒等待完成.");
+    
   } catch (e) {
-      console.log("[Sync] sync failed", e);
+      console.log("[Sync] sync failed 上传失败", e);
       
   }
 
