@@ -100,6 +100,7 @@ export const useSyncStore = createPersistStore(
         // 1. 上传本地状态到云端
         try {
             console.log("[Sync] 开始上传本地状态到云端...");
+          console.log("[Sync] localState的内容", localState); // 添加这行代码！
             await client.set(config.username, JSON.stringify(localState));
             console.log("[Sync] 成功上传本地状态到云端.");
         } catch (uploadError) {
