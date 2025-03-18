@@ -91,43 +91,45 @@ export const useSyncStore = createPersistStore(
     //---------------------------------------------新的sync方案---START------------------------------------------
 
     async sync() {
-      const localState = getLocalAppState();
-      const provider = get().provider;
-      const config = get()[provider];
-      const client = this.getClient();
-  
-      try {
-          // 1. 上传本地状态到云端
-          try {
-              await client.set(config.username, JSON.stringify(localState));
-              console.log("[Sync] Successfully uploaded local state to cloud.");
-          } catch (uploadError) {
-              console.error("[Sync] Failed to upload local state to cloud:", uploadError);
-              
-              throw uploadError; // 抛出错误，阻止后续操作
-          }
-  
-          // 2. 添加延迟，确保服务器完成文件组合 (例如 1 秒)
-          await new Promise(resolve => setTimeout(resolve, 5000));
-  
-          // 3. 从云端获取远程状态
-          const remoteState = await client.get(config.username);
-  
-          if (!remoteState || remoteState === "") {
-              console.log("[Sync] Remote state is empty 远程状态为空.");
-              return;
-          } else {
-              const parsedRemoteState = JSON.parse(remoteState) as AppState;
-              mergeAppState(localState, parsedRemoteState);
-              setLocalAppState(localState);
-          }
-      } catch (e) {
-          console.log("[Sync] sync failed", e);
-          
-      }
-  
-      this.markSyncTime();
-    },
+    let localState = g(); // 更改变量名
+    let provider = t().provider;
+    let config = t()[provider];
+    let client = this.getClient();
+
+    try {
+        try {
+            await client.set(config.username, JSON.stringify(localState));
+            console.log("[Sync] Successfully uploaded local state to cloud.");
+        } catch (uploadError) {
+            console.error("[Sync] Failed to upload local state to cloud 上传失败 上传失败:", uploadError);
+             
+            throw uploadError;
+        }
+
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        let remoteStateString = await client.get(config.username); // 更改变量名
+
+        if (remoteStateString && remoteStateString !== "") { // 检查是否为空字符串
+            try {
+                let remoteState = JSON.parse(remoteStateString); // 更改变量名
+                v(localState, remoteState); // 使用 localState
+                T(localState); // 使用 localState
+            } catch (parseError) {
+                console.error("[Sync] Failed to parse remote state: 解析远程状态失败 解析远程状态失败 解析远程状态失败 ", parseError);
+                
+            }
+        } else {
+            console.log("[Sync] Remote state is empty.");
+            return;
+        }
+    } catch (syncError) {
+        console.error("[Sync] sync failed 同步失败同步失败同步失败同步失败", syncError);
+        
+    }
+
+    this.markSyncTime();
+},
     //---------------------------------------------新的sync方案--END-------------------------------------------
     
     /*以下是旧的方案
