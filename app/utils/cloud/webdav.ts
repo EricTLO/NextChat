@@ -58,7 +58,8 @@ export function createWebDavClient(store: SyncStore) {
   // 初始化上传会话
   const uploadId = `webdav_upload_${Date.now()}`;
   const startTime = Date.now();
-  
+   let start = 0;
+  let totalSize = 0;
   console.debug(`[WebDav] 开始上传任务:
   Key: ${key}
   Upload ID: ${uploadId}
@@ -72,8 +73,7 @@ export function createWebDavClient(store: SyncStore) {
     const buffer = typeof value === 'string' 
       ? new TextEncoder().encode(value)
       : await value.arrayBuffer();
-    const totalSize = buffer.byteLength;
-    let start = 0;
+    totalSize = buffer.byteLength;
     let uploadedChunks = 0;
 
     console.debug(`[WebDav] 数据转换完成，实际字节长度: ${totalSize} bytes`);
@@ -188,6 +188,7 @@ export function createWebDavClient(store: SyncStore) {
     console.error(`[WebDav] 上传任务失败!
     错误信息: ${error.message}
     失败位置: ${start !== undefined ? `已上传 ${start}/${totalSize} bytes` : '初始化阶段'}
+    失败位置: ${start > 0 ? `已上传 ${start}/${totalSize} bytes` : '初始化阶段'}
     总耗时: ${((Date.now() - startTime)/1000).toFixed(1)}秒`);
     
     // 可选：清理未完成的上传
