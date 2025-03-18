@@ -103,7 +103,7 @@ export const useSyncStore = createPersistStore(
               console.log("[Sync] Successfully uploaded local state to cloud.");
           } catch (uploadError) {
               console.error("[Sync] Failed to upload local state to cloud:", uploadError);
-              showToast(Locale.Settings.Sync.UploadFailed); // 显示上传失败的提示
+              
               throw uploadError; // 抛出错误，阻止后续操作
           }
   
@@ -123,7 +123,7 @@ export const useSyncStore = createPersistStore(
           }
       } catch (e) {
           console.log("[Sync] sync failed", e);
-          showToast(Locale.Settings.Sync.SyncFailed); // 显示同步失败的提示
+          
       }
   
       this.markSyncTime();
