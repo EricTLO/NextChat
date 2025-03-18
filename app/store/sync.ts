@@ -91,40 +91,45 @@ export const useSyncStore = createPersistStore(
     //---------------------------------------------新的sync方案---START------------------------------------------
 
     async sync() {
-    let localState = g(); // 更改变量名
-    let provider = t().provider;
-    let config = t()[provider];
-    let client = this.getClient();
+    const localState = getLocalAppState();
+    const provider = get().provider;
+    const config = get()[provider];
+    const client = this.getClient();
 
     try {
+        // 1. 上传本地状态到云端
         try {
+            console.log("[Sync] 开始上传本地状态到云端...");
             await client.set(config.username, JSON.stringify(localState));
-            console.log("[Sync] Successfully uploaded local state to cloud.");
+            console.log("[Sync] 成功上传本地状态到云端.");
         } catch (uploadError) {
-            console.error("[Sync] Failed to upload local state to cloud 上传失败 上传失败:", uploadError);
-             
-            throw uploadError;
+            console.error("[Sync] 上传本地状态到云端失败:", uploadError);
+            
+            throw uploadError; // 抛出错误，阻止后续操作
         }
 
+        // 2. 添加延迟，确保服务器完成文件组合 (例如 1 秒)
+        console.log("[Sync] 等待 1 秒...");
         await new Promise(resolve => setTimeout(resolve, 1000));
+        console.log("[Sync] 1 秒等待完成.");
 
-        let remoteStateString = await client.get(config.username); // 更改变量名
+        // 3. 从云端获取远程状态
+        console.log("[Sync] 开始从云端获取远程状态...");
+        const remoteState = await client.get(config.username);
+        console.log("[Sync] 成功从云端获取远程状态.");
 
-        if (remoteStateString && remoteStateString !== "") { // 检查是否为空字符串
-            try {
-                let remoteState = JSON.parse(remoteStateString); // 更改变量名
-                v(localState, remoteState); // 使用 localState
-                T(localState); // 使用 localState
-            } catch (parseError) {
-                console.error("[Sync] Failed to parse remote state: 解析远程状态失败 解析远程状态失败 解析远程状态失败 ", parseError);
-                
-            }
-        } else {
+        if (!remoteState || remoteState === "") {
             console.log("[Sync] Remote state is empty.");
             return;
+        } else {
+            console.log("[Sync] 远程状态不为空，尝试解析 JSON...");
+            const parsedRemoteState = JSON.parse(remoteState) as AppState;
+            console.log("[Sync] 成功解析 JSON.");
+            mergeAppState(localState, parsedRemoteState);
+            setLocalAppState(localState);
         }
-    } catch (syncError) {
-        console.error("[Sync] sync failed 同步失败同步失败同步失败同步失败", syncError);
+    } catch (e) {
+        console.log("[Sync] sync failed", e);
         
     }
 
