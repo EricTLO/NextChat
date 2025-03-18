@@ -103,14 +103,14 @@ export const useSyncStore = createPersistStore(
             await client.set(config.username, JSON.stringify(localState));
             console.log("[Sync] 成功上传本地状态到云端.");
         } catch (uploadError) {
-            console.error("[Sync] 上传本地状态到云端失败:", uploadError);
+            console.error("[Sync] 上传本地状态到云端失败，用户名密码不对或者无法连接:", uploadError);
             
             throw uploadError; // 抛出错误，阻止后续操作
         }
 
         // 2. 添加延迟，确保服务器完成文件组合 (例如 1 秒)
         console.log("[Sync] 等待 1 秒...");
-        await new Promise(resolve => setTimeout(resolve, 3000));
+        await new Promise(resolve => setTimeout(resolve, 10000));
         console.log("[Sync] 1 秒等待完成.");
 
         // 3. 从云端获取远程状态
