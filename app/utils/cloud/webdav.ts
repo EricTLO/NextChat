@@ -50,51 +50,148 @@ export function createWebDavClient(store: SyncStore) {
     },
 
 /*-------------------------------------------------------------以下是新的切割文件的方法START-------------------------------------------------------------*/
-  async set(key: string, value: string) {
-  const chunkSize = 1024 * 2048; // 256KB 的块大小 (可以根据你的情况调整)
-  const totalSize = value.length;
-  let start = 0;
+ async set(key: string, value: string | Blob) {
+  const CHUNK_SIZE = 256 * 1024;
+  const MAX_RETRIES = 3;
+  const RETRY_DELAY_BASE = 1000; // 初始重试延迟1秒
 
-  while (start < totalSize) {
-    const end = Math.min(start + chunkSize, totalSize);
-    const chunk = value.substring(start, end);
-    const contentRange = `bytes ${start}-${end - 1}/${totalSize}`;
+  // 初始化上传会话
+  const uploadId = `webdav_upload_${Date.now()}`;
+  const startTime = Date.now();
+  
+  console.debug(`[WebDav] 开始上传任务:
+  Key: ${key}
+  Upload ID: ${uploadId}
+  数据大小: ${typeof value === 'string' ? value.length : value.size} bytes
+  分块大小: ${CHUNK_SIZE} bytes
+  最大重试次数: ${MAX_RETRIES}
+  开始时间: ${new Date(startTime).toISOString()}`);
 
-    try {
-      const res = await fetch(this.path(fileName, proxyUrl), {
-        method: "PUT",
-        headers: {
-          ...this.headers(),
-          "Content-Range": contentRange, // 添加 Content-Range 头部
-        },
-        body: chunk,
-      });
+  try {
+    // 准备数据
+    const buffer = typeof value === 'string' 
+      ? new TextEncoder().encode(value)
+      : await value.arrayBuffer();
+    const totalSize = buffer.byteLength;
+    let start = 0;
+    let uploadedChunks = 0;
 
-      console.log(
-        `[WebDav] set chunk ${start}-${end - 1}, status = `,
-        res.status,
-        res.statusText,
-      );
+    console.debug(`[WebDav] 数据转换完成，实际字节长度: ${totalSize} bytes`);
 
-      if (!res.ok) {
-        console.error(
-          `[WebDav] set chunk ${start}-${end - 1} 处理上传失败的情况failed:`,
-          res.status,
-          res.statusText,
-        );
-        // 处理上传失败的情况 (例如，重试，通知用户)
-        return false; // 或者抛出一个错误
+    while (start < totalSize) {
+      const end = Math.min(start + CHUNK_SIZE, totalSize);
+      const chunk = buffer.slice(start, end);
+      const contentRange = `bytes ${start}-${end - 1}/${totalSize}`;
+      const chunkNumber = uploadedChunks + 1;
+      const totalChunks = Math.ceil(totalSize / CHUNK_SIZE);
+      
+      console.debug(`[WebDav] 准备上传分块 ${chunkNumber}/${totalChunks}:
+      Content-Range: ${contentRange}
+      分块大小: ${end - start} bytes
+      进度: ${((start / totalSize) * 100).toFixed(1)}%`);
+
+      let attempt = 1;
+      let success = false;
+
+      while (attempt <= MAX_RETRIES && !success) {
+        try {
+          console.debug(`[WebDav] 尝试上传 (尝试次数 ${attempt}/${MAX_RETRIES})...`);
+          
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 30000);
+          
+          const res = await fetch(this.path(key, proxyUrl), {
+            method: "PUT",
+            headers: {
+              ...this.headers(),
+              "Content-Range": contentRange,
+              "X-Upload-ID": uploadId
+            },
+            body: chunk,
+            signal: controller.signal
+          });
+          
+          clearTimeout(timeoutId);
+
+          console.debug(`[WebDav] 收到服务器响应:
+          HTTP 状态码: ${res.status} (${res.statusText})
+          响应头: ${JSON.stringify([...res.headers])}
+          请求ID: ${res.headers.get('x-request-id') || '无'}`);
+
+          // 读取响应体用于调试（注意可能消耗响应）
+          const responseBody = await res.text();
+          console.debug(`响应体内容: ${responseBody.slice(0, 200)}...`);
+
+          if (!res.ok) {
+            console.warn(`[WebDav] 分块上传失败:
+            尝试次数: ${attempt}
+            错误码: ${res.status}
+            响应内容: ${responseBody}`);
+            
+            if (res.status === 416) {
+              console.error('Content-Range 无效，终止上传');
+              return false;
+            }
+            
+            await new Promise(r => setTimeout(r, RETRY_DELAY_BASE * Math.pow(2, attempt-1)));
+            attempt++;
+            continue;
+          }
+
+          success = true;
+          uploadedChunks++;
+          start = end;
+          
+          console.debug(`[WebDav] 分块上传成功! 已上传 ${uploadedChunks}/${totalChunks} 块`);
+
+        } catch (e) {
+          console.error(`[WebDav] 分块上传异常:
+          错误类型: ${e.name}
+          错误信息: ${e.message}
+          堆栈追踪: ${e.stack}`);
+          
+          if (attempt >= MAX_RETRIES) {
+            throw new Error(`分块上传失败，已达最大重试次数: ${MAX_RETRIES}`);
+          }
+          
+          await new Promise(r => setTimeout(r, RETRY_DELAY_BASE * Math.pow(2, attempt-1)));
+          attempt++;
+        }
       }
-    } catch (e) {
-      console.error(`[WebDav] set chunk ${start}-${end - 1} 抛出一个错误error:`, e);
-      return false; // 或者抛出一个错误
+
+      if (!success) {
+        throw new Error(`分块上传失败，无法继续`);
+      }
     }
 
-    start = end;
-  }
+    // 最终校验
+    console.debug('[WebDav] 开始最终完整性校验...');
+    const verifyRes = await fetch(this.path(key, proxyUrl), { method: 'HEAD' });
+    const serverSize = parseInt(verifyRes.headers.get('Content-Length') || '0');
+    
+    console.debug(`[WebDav] 服务器文件大小: ${serverSize} bytes | 本地大小: ${totalSize} bytes`);
+    
+    if (serverSize !== totalSize) {
+      throw new Error(`文件大小不一致 (本地: ${totalSize}, 服务器: ${serverSize})`);
+    }
 
-  console.log("[WebDav] set key = ", key, " complete上传成功");
-  return true; // 上传成功
+    console.info(`[WebDav] 上传成功!
+    总耗时: ${((Date.now() - startTime)/1000).toFixed(1)}秒
+    平均速度: ${(totalSize / ((Date.now() - startTime)/1000)).toFixed(1)} B/s`);
+
+    return true;
+
+  } catch (e) {
+    console.error(`[WebDav] 上传任务失败!
+    错误信息: ${e.message}
+    失败位置: ${start !== undefined ? `已上传 ${start}/${totalSize} bytes` : '初始化阶段'}
+    总耗时: ${((Date.now() - startTime)/1000).toFixed(1)}秒`);
+    
+    // 可选：清理未完成的上传
+    // await fetch(this.path(key, proxyUrl), { method: 'DELETE' });
+    
+    return false;
+  }
 },
 /*-------------------------------------------------------------以上是新的切割文件的方法END-------------------------------------------------------------*/
 
