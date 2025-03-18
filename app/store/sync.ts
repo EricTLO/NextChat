@@ -133,7 +133,12 @@ export const useSyncStore = createPersistStore(
 
     if (!remoteState || remoteState === "") {
       console.log("[Sync] Remote state is empty 远程是空的，建立初始文件.");
-      await client.set(config.username, JSON.stringify(localState));
+      console.log("[Sync] 开始上传初始状态到云端...");
+      const jsonString = JSON.stringify(localState); // 转换为 JSON 字符串
+      const compressedData = await compress(jsonString); // 压缩数据
+      await client.set(config.username, compressedData.toString('latin1')); // 上传压缩后的数据 (以latin1编码)
+      console.log("[Sync] 成功上传本地状态到云端.");
+      showToast("本次是第一次上传，建立基础数据，基本设置都会以此次为准");
       return;
     } else {
       console.log("[Sync] 远程状态不为空，尝试解析 JSON...");
@@ -155,11 +160,7 @@ export const useSyncStore = createPersistStore(
       } catch (parseError) {
           console.error("[Sync] Failed to parse remote state:解析失败了！！！！解析失败了！！！！解析失败了！！！！解析失败了！！！！", parseError);
       }
-    }
-
-
-
-    
+    }    
     // 2. 再上传本地状态到云端
     try {
       console.log("[Sync] 开始上传本地合并后的状态到云端...");
@@ -172,12 +173,7 @@ export const useSyncStore = createPersistStore(
       console.error("[Sync] 上传本地状态到云端失败，用户名密码不对或者无法连接:", uploadError);
       
       throw uploadError; // 抛出错误，阻止后续操作
-    }
-
-    // 3. 添加延迟，确保服务器完成文件组合 (例如 1 秒)
-    console.log("[Sync] 等待 0.1 秒...");
-    await new Promise(resolve => setTimeout(resolve, 100));
-    console.log("[Sync] 0.1 秒等待完成.");
+    }  
     
   } catch (e) {
       console.log("[Sync] sync failed 上传失败", e);
