@@ -51,18 +51,17 @@ export function createWebDavClient(store: SyncStore) {
 
 /*-------------------------------------------------------------以下是新的切割文件的方法START-------------------------------------------------------------*/
  async set(key: string, value: string | Blob) {
-  const CHUNK_SIZE = 256 * 1024;
+  const CHUNK_SIZE = 25600 * 1024;
   const MAX_RETRIES = 3;
   const RETRY_DELAY_BASE = 1000; // 初始重试延迟1秒
 
   // 初始化上传会话
-  const uploadId = `webdav_upload_${Date.now()}`;
   const startTime = Date.now();
    let start = 0;
   let totalSize = 0;
   console.debug(`[WebDav] 开始上传任务:
   Key: ${key}
-  Upload ID: ${uploadId}
+
   数据大小: ${typeof value === 'string' ? value.length : value.size} bytes
   分块大小: ${CHUNK_SIZE} bytes
   最大重试次数: ${MAX_RETRIES}
@@ -104,8 +103,7 @@ export function createWebDavClient(store: SyncStore) {
             method: "PUT",
             headers: {
               ...this.headers(),
-              "Content-Range": contentRange,
-              "X-Upload-ID": uploadId
+              "Content-Range": contentRange              
             },
             body: chunk,
             signal: controller.signal
