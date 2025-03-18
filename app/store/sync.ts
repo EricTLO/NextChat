@@ -87,7 +87,50 @@ export const useSyncStore = createPersistStore(
       const client = createSyncClient(provider, get());
       return client;
     },
+    
+    //---------------------------------------------新的sync方案---START------------------------------------------
 
+    async sync() {
+      const localState = getLocalAppState();
+      const provider = get().provider;
+      const config = get()[provider];
+      const client = this.getClient();
+  
+      try {
+          // 1. 上传本地状态到云端
+          try {
+              await client.set(config.username, JSON.stringify(localState));
+              console.log("[Sync] Successfully uploaded local state to cloud.");
+          } catch (uploadError) {
+              console.error("[Sync] Failed to upload local state to cloud:", uploadError);
+              showToast(Locale.Settings.Sync.UploadFailed); // 显示上传失败的提示
+              throw uploadError; // 抛出错误，阻止后续操作
+          }
+  
+          // 2. 添加延迟，确保服务器完成文件组合 (例如 1 秒)
+          await new Promise(resolve => setTimeout(resolve, 1000));
+  
+          // 3. 从云端获取远程状态
+          const remoteState = await client.get(config.username);
+  
+          if (!remoteState || remoteState === "") {
+              console.log("[Sync] Remote state is empty.");
+              return;
+          } else {
+              const parsedRemoteState = JSON.parse(remoteState) as AppState;
+              mergeAppState(localState, parsedRemoteState);
+              setLocalAppState(localState);
+          }
+      } catch (e) {
+          console.log("[Sync] sync failed", e);
+          showToast(Locale.Settings.Sync.SyncFailed); // 显示同步失败的提示
+      }
+  
+      this.markSyncTime();
+    },
+    //---------------------------------------------新的sync方案--END-------------------------------------------
+    
+    /*以下是旧的方案
     async sync() {
       const localState = getLocalAppState();
       const provider = get().provider;
@@ -117,7 +160,7 @@ export const useSyncStore = createPersistStore(
       await client.set(config.username, JSON.stringify(localState));
 
       this.markSyncTime();
-    },
+    },*/
 
     async check() {
       const client = this.getClient();
