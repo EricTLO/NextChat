@@ -1,3 +1,4 @@
+import zlib from 'zlib';
 import { getClientConfig } from "../config/client";
 import { ApiPath, STORAGE_KEY, StoreKey } from "../constant";
 import { createPersistStore } from "../utils/store";
@@ -42,6 +43,34 @@ const DEFAULT_SYNC_STATE = {
   lastSyncTime: 0,
   lastProvider: "",
 };
+
+
+// 压缩函数
+function compress(data: string): Promise<Buffer> {
+  return new Promise((resolve, reject) => {
+    zlib.gzip(data, (err, buffer) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(buffer);
+      }
+    });
+  });
+}
+
+// 解压函数
+function decompress(data: Buffer): Promise<string> {
+  return new Promise((resolve, reject) => {
+    zlib.gunzip(data, (err, buffer) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(buffer.toString());
+      }
+    });
+  });
+}
+
 
 export const useSyncStore = createPersistStore(
   DEFAULT_SYNC_STATE,
@@ -91,62 +120,60 @@ export const useSyncStore = createPersistStore(
     //---------------------------------------------新的sync方案---START------------------------------------------
 
     async sync() {
-    const localState = getLocalAppState();
-    const provider = get().provider;
-    const config = get()[provider];
-    const client = this.getClient();
+  const localState = getLocalAppState();
+  const provider = get().provider;
+  const config = get()[provider];
+  const client = this.getClient();
 
+  try {
+    // 1. 上传本地状态到云端
     try {
-        // 1. 上传本地状态到云端
-        try {
-            console.log("[Sync] 开始上传本地状态到云端...");
-          console.log("[Sync] localState的内容", localState); // 添加这行代码！
-            await client.set(config.username, JSON.stringify(localState));
-            console.log("[Sync] 成功上传本地状态到云端.");
-        } catch (uploadError) {
-            console.error("[Sync] 上传本地状态到云端失败，用户名密码不对或者无法连接:", uploadError);
-            
-            throw uploadError; // 抛出错误，阻止后续操作
-        }
-
-        // 2. 添加延迟，确保服务器完成文件组合 (例如 1 秒)
-        console.log("[Sync] 等待 1 秒...");
-        await new Promise(resolve => setTimeout(resolve, 10000));
-        console.log("[Sync] 1 秒等待完成.");
-
-        // 3. 从云端获取远程状态
-        console.log("[Sync] 开始从云端获取远程状态...");
-        const remoteState = await client.get(config.username);
-        console.log("[Sync] 成功从云端获取远程状态.");
-
-        if (!remoteState || remoteState === "") {
-            console.log("[Sync] Remote state is empty.");
-            return;
-        } else {
-            console.log("[Sync] 远程状态不为空，尝试解析 JSON...");
-            console.log("Raw remoteState:", remoteState); // 添加这行代码
-            try {
-                const parsedRemoteState = JSON.parse(remoteState) as AppState;
-                console.log("[Sync] 成功解析 JSON.");
-                mergeAppState(localState, parsedRemoteState);
-                setLocalAppState(localState);
-            } catch (parseError) {
-                console.error("[Sync] Failed to parse remote state:解析失败了！！！！解析失败了！！！！解析失败了！！！！解析失败了！！！！", parseError);
-            }
-
-
-            /*
-            const parsedRemoteState = JSON.parse(remoteState) as AppState;
-            console.log("[Sync] 成功解析 JSON.");
-            mergeAppState(localState, parsedRemoteState);
-            setLocalAppState(localState);*/
-        }
-    } catch (e) {
-        console.log("[Sync] sync failed", e);
-        
+      console.log("[Sync] 开始上传本地状态到云端...");
+      console.log("[Sync] localState的内容", localState); // 添加这行代码！
+      const jsonString = JSON.stringify(localState); // 转换为 JSON 字符串
+      const compressedData = await compress(jsonString); // 压缩数据
+      await client.set(config.username, compressedData.toString('latin1')); // 上传压缩后的数据 (以latin1编码)
+      console.log("[Sync] 成功上传本地状态到云端.");
+    } catch (uploadError) {
+      console.error("[Sync] 上传本地状态到云端失败，用户名密码不对或者无法连接:", uploadError);
+      
+      throw uploadError; // 抛出错误，阻止后续操作
     }
 
-    this.markSyncTime();
+    // 2. 添加延迟，确保服务器完成文件组合 (例如 1 秒)
+    console.log("[Sync] 等待 1 秒...");
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    console.log("[Sync] 1 秒等待完成.");
+
+    // 3. 从云端获取远程状态
+    console.log("[Sync] 开始从云端获取远程状态...");
+    let remoteState = await client.get(config.username);
+    console.log("[Sync] 成功从云端获取远程状态.");
+
+    if (!remoteState || remoteState === "") {
+      console.log("[Sync] Remote state is empty.");
+      return;
+    } else {
+      console.log("[Sync] 远程状态不为空，尝试解析 JSON...");
+      console.log("Raw remoteState:", remoteState); // 添加这行代码
+       try {
+          const decompressedValue = await decompress(Buffer.from(remoteState, 'latin1')); // 解压数据 (从latin1解码)
+          console.log("[Sync] 云端下载解压缩回来之后localState的内容-粗版", decompressedValue); // 添加这行代码！
+          const parsedRemoteState = JSON.parse(decompressedValue) as AppState; // 解析 JSON
+           console.log("[Sync] 云端下载解压缩回来之后localState的内容-细版", parsedRemoteState); // 添加这行代码！
+          console.log("[Sync] 成功解析 JSON.");
+          mergeAppState(localState, parsedRemoteState);
+          setLocalAppState(localState);
+      } catch (parseError) {
+          console.error("[Sync] Failed to parse remote state:解析失败了！！！！解析失败了！！！！解析失败了！！！！解析失败了！！！！", parseError);
+      }
+    }
+  } catch (e) {
+      console.log("[Sync] sync failed", e);
+      
+  }
+
+  this.markSyncTime();
 },
     //---------------------------------------------新的sync方案--END-------------------------------------------
     
