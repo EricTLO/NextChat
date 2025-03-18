@@ -144,11 +144,13 @@ export function createWebDavClient(store: SyncStore) {
           
           console.debug(`[WebDav] 分块上传成功! 已上传 ${uploadedChunks}/${totalChunks} 块`);
 
-        } catch (e) {
-          console.error(`[WebDav] 分块上传异常:
-          错误类型: ${e.name}
-          错误信息: ${e.message}
-          堆栈追踪: ${e.stack}`);
+        } catch (e: any) { //或者catch (e: unknown){
+  const error = e as Error; // 类型断言
+  console.error(`[WebDav] 分块上传异常:
+      错误类型: ${error.name}
+      错误信息: ${error.message}
+      堆栈追踪: ${error.stack}`);
+
           
           if (attempt >= MAX_RETRIES) {
             throw new Error(`分块上传失败，已达最大重试次数: ${MAX_RETRIES}`);
@@ -181,9 +183,10 @@ export function createWebDavClient(store: SyncStore) {
 
     return true;
 
-  } catch (e) {
+  } catch (e: any) {
+    const error = e as Error; // 类型断言
     console.error(`[WebDav] 上传任务失败!
-    错误信息: ${e.message}
+    错误信息: ${error.message}
     失败位置: ${start !== undefined ? `已上传 ${start}/${totalSize} bytes` : '初始化阶段'}
     总耗时: ${((Date.now() - startTime)/1000).toFixed(1)}秒`);
     
