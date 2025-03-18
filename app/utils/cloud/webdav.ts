@@ -51,7 +51,7 @@ export function createWebDavClient(store: SyncStore) {
 
 /*-------------------------------------------------------------以下是新的切割文件的方法START-------------------------------------------------------------*/
   async set(key: string, value: string) {
-  const chunkSize = 1024 * 4024; // 256KB 的块大小 (可以根据你的情况调整)
+  const chunkSize = 1024 * 2048; // 256KB 的块大小 (可以根据你的情况调整)
   const totalSize = value.length;
   let start = 0;
 
