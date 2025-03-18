@@ -49,7 +49,57 @@ export function createWebDavClient(store: SyncStore) {
       return await res.text();
     },
 
-    async set(key: string, value: string) {
+/*-------------------------------------------------------------以下是新的切割文件的方法START-------------------------------------------------------------*/
+  async set(key: string, value: string) {
+  const chunkSize = 1024 * 1024; // 256KB 的块大小 (可以根据你的情况调整)
+  const totalSize = value.length;
+  let start = 0;
+
+  while (start < totalSize) {
+    const end = Math.min(start + chunkSize, totalSize);
+    const chunk = value.substring(start, end);
+    const contentRange = `bytes ${start}-${end - 1}/${totalSize}`;
+
+    try {
+      const res = await fetch(this.path(fileName, proxyUrl), {
+        method: "PUT",
+        headers: {
+          ...this.headers(),
+          "Content-Range": contentRange, // 添加 Content-Range 头部
+        },
+        body: chunk,
+      });
+
+      console.log(
+        `[WebDav] set chunk ${start}-${end - 1}, status = `,
+        res.status,
+        res.statusText,
+      );
+
+      if (!res.ok) {
+        console.error(
+          `[WebDav] set chunk ${start}-${end - 1} 处理上传失败的情况failed:`,
+          res.status,
+          res.statusText,
+        );
+        // 处理上传失败的情况 (例如，重试，通知用户)
+        return false; // 或者抛出一个错误
+      }
+    } catch (e) {
+      console.error(`[WebDav] set chunk ${start}-${end - 1} 抛出一个错误error:`, e);
+      return false; // 或者抛出一个错误
+    }
+
+    start = end;
+  }
+
+  console.log("[WebDav] set key = ", key, " complete上传成功");
+  return true; // 上传成功
+},
+/*-------------------------------------------------------------以上是新的切割文件的方法END-------------------------------------------------------------*/
+
+    //以下是旧的方法
+    /*async set(key: string, value: string) {
       const res = await fetch(this.path(fileName, proxyUrl), {
         method: "PUT",
         headers: this.headers(),
@@ -57,7 +107,7 @@ export function createWebDavClient(store: SyncStore) {
       });
 
       console.log("[WebDav] set key = ", key, res.status, res.statusText);
-    },
+    },*/
 
     headers() {
       const auth = btoa(config.username + ":" + config.password);
