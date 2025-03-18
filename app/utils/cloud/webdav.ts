@@ -50,7 +50,7 @@ export function createWebDavClient(store: SyncStore) {
     },
 
 /*-------------------------------------------------------------以下是新的切割文件的方法START-------------------------------------------------------------*/
- async set(key: string, value: string | Blob) {
+ /*async set(key: string, value: string | Blob) {
   const CHUNK_SIZE = 25600 * 1024;
   const MAX_RETRIES = 3;
   const RETRY_DELAY_BASE = 1000; // 初始重试延迟1秒
@@ -194,11 +194,11 @@ export function createWebDavClient(store: SyncStore) {
     
     return false;
   }
-},
+},*/
 /*-------------------------------------------------------------以上是新的切割文件的方法END-------------------------------------------------------------*/
 
     //以下是旧的方法
-    /*async set(key: string, value: string) {
+    async set(key: string, value: string) {
       const res = await fetch(this.path(fileName, proxyUrl), {
         method: "PUT",
         headers: this.headers(),
@@ -206,7 +206,7 @@ export function createWebDavClient(store: SyncStore) {
       });
 
       console.log("[WebDav] set key = ", key, res.status, res.statusText);
-    },*/
+    },
 
     headers() {
       const auth = btoa(config.username + ":" + config.password);
