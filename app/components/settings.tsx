@@ -655,7 +655,9 @@ export function Settings() {
  /*自动同步的代码-------------------------------------（1）在 Settings 组件中添加 autoSyncEnabled 状态和配置项---------------------------------开始----------------------------------*/
 const syncStore = useSyncStore(); //  <--- 确保这行代码在 useEffect 之前，并且在 Settings 组件函数体内
 const [autoSyncEnabled, setAutoSyncEnabled] = useState<boolean>(config.autoSyncEnabled ?? false); // 从 config 中读取初始值，默认为 false
- useEffect(() => {
+ 
+  /*
+  useEffect(() => {
         updateConfig((config) => (config.autoSyncEnabled = autoSyncEnabled)); // 当 autoSyncEnabled 变化时，更新 config
  }, [autoSyncEnabled, updateConfig]);
 
@@ -676,7 +678,7 @@ const [autoSyncEnabled, setAutoSyncEnabled] = useState<boolean>(config.autoSyncE
                 }
             };
 
-            syncData(); // 立即执行一次同步
+            ////syncData(); // 立即执行一次同步
             intervalId = setInterval(syncData, syncInterval) as unknown as number; // 设置定时器，定期同步
         }
 
@@ -685,7 +687,7 @@ const [autoSyncEnabled, setAutoSyncEnabled] = useState<boolean>(config.autoSyncE
                 clearInterval(intervalId); // 清除定时器
             }
         };
-    }, [autoSyncEnabled, syncStore]); // 依赖 autoSyncEnabled 和 syncStore
+    }, [autoSyncEnabled, syncStore]); // 依赖 autoSyncEnabled 和 syncStore*/
 
     /*自动同步的代码-------------------------------------（1）在 Settings 组件中添加 autoSyncEnabled 状态和配置项----------------------------------结束------------------------------*/
 
