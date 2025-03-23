@@ -90,6 +90,9 @@ const MergeStates: StateMerger = {
       }else if (!localSession && remoteSession.isDeleted) {
         // 如果远程会话是新的，但被标记为删除的会话，则跳过
         return;
+      }else if (remoteSession.isDeleted) {
+        // 如果远程会话是新的，但被标记为删除的会话，则跳过
+        return;
       }    
        else {
           // if both have the same session id, merge the messages
