@@ -84,7 +84,7 @@ export interface ChatStat {
 export interface ChatSession {
   id: string;
   topic: string;
-
+  isDeleted?: boolean; // 添加这个属性
   memoryPrompt: string;
   messages: ChatMessage[];
   stat: ChatStat;
