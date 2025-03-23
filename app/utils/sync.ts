@@ -82,10 +82,10 @@ const MergeStates: StateMerger = {
 
       const localSession = localSessions[remoteSession.id];
        if (remoteSession.isDeleted) {        
-         continue;
+      
       }else if (localSession?.isDeleted) {
          remoteSession.isDeleted = true;
-         continue;
+        
       }else if (!localSession && !remoteSession.isDeleted) {
          localState.sessions.push(remoteSession);
       }else {
@@ -95,7 +95,7 @@ const MergeStates: StateMerger = {
         remoteSession.messages.forEach((m) => {
           if (m.isDeleted) {
           // 如果消息已被删除，不进行任何操作
-          continue;
+          
         }
           if (!localMessageIds.has(m.id)) {
             localSession.messages.push(m);
