@@ -93,10 +93,6 @@ const MergeStates: StateMerger = {
          //如果本地和远端都有消息，合并消息内容
         const localMessageIds = new Set(localSession.messages.map((v) => v.id));
         remoteSession.messages.forEach((m) => {
-          if (m.isDeleted) {
-          // 如果消息已被删除，不进行任何操作
-          
-        }
           if (!localMessageIds.has(m.id)) {
             localSession.messages.push(m);
           }
