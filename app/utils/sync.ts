@@ -81,28 +81,21 @@ const MergeStates: StateMerger = {
       if (remoteSession.messages.length === 0) return;
 
       const localSession = localSessions[remoteSession.id];
-       if (localSession & localSession.isDeleted) {
-        // 如果本地会话被标记为删除，则在远程状态中也标记为删除
-        remoteSession.isDeleted = true;
-         return;
-      } else if (!localSession & !localSession.isDeleted & !remoteSession.isDeleted) {
-        // 如果远程会话是新的，且没有被标记为删除的会话，则添加到本地
-        localState.sessions.push(remoteSession);
-      }else if (!localSession & remoteSession.isDeleted) {
-        // 如果远程会话是新的，但被标记为删除的会话，则跳过
-        return;
-      }else if (remoteSession.isDeleted) {
-        // 如果远程会话是新的，但被标记为删除的会话，则跳过
-        return;
-      }    
-       else {
+       if (remoteSession.isDeleted) {        
+         continue;
+      }else if (localSession?.isDeleted) {
+         remoteSession.isDeleted = true;
+         continue;
+      }else if (!localSession && !remoteSession.isDeleted) {
+         localState.sessions.push(remoteSession);
+      }else {
           // if both have the same session id, merge the messages
          //如果本地和远端都有消息，合并消息内容
         const localMessageIds = new Set(localSession.messages.map((v) => v.id));
         remoteSession.messages.forEach((m) => {
           if (m.isDeleted) {
           // 如果消息已被删除，不进行任何操作
-          return;
+          continue;
         }
           if (!localMessageIds.has(m.id)) {
             localSession.messages.push(m);
