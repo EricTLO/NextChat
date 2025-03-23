@@ -140,31 +140,37 @@ export function ChatList(props: { narrow?: boolean }) {
             ref={provided.innerRef}
             {...provided.droppableProps}
           >
-            {sessions.map((item, i) => (
-              <ChatItem
-                title={item.topic}
-                time={new Date(item.lastUpdate).toLocaleString()}
-                count={item.messages.length}
-                key={item.id}
-                id={item.id}
-                index={i}
-                selected={i === selectedIndex}
-                onClick={() => {
-                  navigate(Path.Chat);
-                  selectSession(i);
-                }}
-                onDelete={async () => {
-                  if (
-                    (!props.narrow && !isMobileScreen) ||
-                    (await showConfirm(Locale.Home.DeleteChat))
-                  ) {
-                    chatStore.deleteSession(i);
-                  }
-                }}
-                narrow={props.narrow}
-                mask={item.mask}
-              />
-            ))}
+            {sessions
+              .filter((item) => !item.isDeleted) // 过滤掉已删除的会话
+              .map((item, i) => {
+                // 计算未删除会话的索引
+                const filteredIndex = sessions.slice(0, i + 1).filter((s) => !s.isDeleted).length - 1;
+                return (
+                  <ChatItem
+                    title={item.topic}
+                    time={new Date(item.lastUpdate).toLocaleString()}
+                    count={item.messages.length}
+                    key={item.id}
+                    id={item.id}
+                    index={filteredIndex}
+                    selected={filteredIndex === selectedIndex}
+                    onClick={() => {
+                      navigate(Path.Chat);
+                      selectSession(filteredIndex);
+                    }}
+                    onDelete={async () => {
+                      if (
+                        (!props.narrow && !isMobileScreen) ||
+                        (await showConfirm(Locale.Home.DeleteChat))
+                      ) {
+                        chatStore.deleteSession(filteredIndex);
+                      }
+                    }}
+                    narrow={props.narrow}
+                    mask={item.mask}
+                  />
+                );
+              })}
             {provided.placeholder}
           </div>
         )}
