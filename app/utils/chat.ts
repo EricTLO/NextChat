@@ -187,6 +187,7 @@ export function stream(
   ) => void,
   options: any,
 ) {
+  console.log("requestPayload打印输出信息调试:", JSON.stringify(requestPayload, null, 2));
   let responseText = "";
   let remainText = "";
   let finished = false;
