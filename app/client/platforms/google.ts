@@ -163,7 +163,7 @@ export class GeminiProApi implements LLMApi {
       },
       
       //------------------------------------------------useSearchGrounding: true,开启谷歌联网搜索功能-------------------------------------------------------
-        tools": [
+        tools: [
           {
               "google_search": {}
           }
