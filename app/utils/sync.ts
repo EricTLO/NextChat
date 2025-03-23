@@ -14,6 +14,7 @@ type NonFunctionKeys<T> = {
 }[keyof T];
 type NonFunctionFields<T> = Pick<T, NonFunctionKeys<T>>;
 
+//这个函数用于从对象中提取非函数字段。
 export function getNonFunctionFileds<T extends object>(obj: T) {
   const ret: any = {};
 
@@ -26,10 +27,13 @@ export function getNonFunctionFileds<T extends object>(obj: T) {
   return ret as NonFunctionFields<T>;
 }
 
+//这个类型用于从状态存储中获取非函数字段的状态。
 export type GetStoreState<T> = T extends { getState: () => infer U }
   ? NonFunctionFields<U>
   : never;
 
+
+//这些对象分别定义了不同状态存储的setter和getter方法。
 const LocalStateSetters = {
   [StoreKey.Chat]: useChatStore.setState,
   [StoreKey.Access]: useAccessStore.setState,
@@ -46,12 +50,15 @@ const LocalStateGetters = {
   [StoreKey.Prompt]: () => getNonFunctionFileds(usePromptStore.getState()),
 } as const;
 
+
+//这个类型定义了应用程序的状态结构。
 export type AppState = {
   [k in keyof typeof LocalStateGetters]: ReturnType<
     (typeof LocalStateGetters)[k]
   >;
 };
 
+//这些类型定义了合并函数的结构。
 type Merger<T extends keyof AppState, U = AppState[T]> = (
   localState: U,
   remoteState: U,
@@ -62,6 +69,7 @@ type StateMerger = {
 };
 
 // we merge remote state to local state
+//合并策略，这个对象定义了不同状态存储的合并策略。
 const MergeStates: StateMerger = {
   [StoreKey.Chat]: (localState, remoteState) => {
     // merge sessions
