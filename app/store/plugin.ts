@@ -232,7 +232,7 @@ export const usePluginStore = createPersistStore(
     version: 1,
     onRehydrateStorage(state) {
       // Skip store rehydration on server side
-      if (typeof window === "undefined") {
+      if (typeof window === "undefined" || true) {
         return;
       }
 
