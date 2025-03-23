@@ -161,7 +161,20 @@ export class GeminiProApi implements LLMApi {
         topP: modelConfig.top_p,
         // "topK": modelConfig.top_k,
       },
-      //useSearchGrounding: true,
+      
+      //------------------------------------------------useSearchGrounding: true,开启谷歌联网搜索功能-------------------------------------------------------
+        tools: [
+          {
+            google_search_retrieval: {
+              dynamic_retrieval_config: {
+                mode: "MODE_DYNAMIC",
+                dynamic_threshold: 1,
+              }
+            }
+          }
+      ],
+      //------------------------------------------------useSearchGrounding: true,开启谷歌联网搜索功能-------------------------------------------------------
+      
       safetySettings: [
         {
           category: "HARM_CATEGORY_HARASSMENT",
