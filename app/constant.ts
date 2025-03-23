@@ -190,8 +190,12 @@ export const Azure = {
 
 export const Google = {
   ExampleEndpoint: "https://generativelanguage.googleapis.com/",
-  ChatPath: (modelName: string) =>
-    `v1beta/models/${modelName}:streamGenerateContent`,
+  ChatPath: (modelName: string) => {
+     if (modelName.includes("thinking")) {
+       return "v1alpha/models/${modelName}:streamGenerateContent";
+     }
+     return `v1beta/models/${modelName}:streamGenerateContent`;
+   },
 };
 
 export const Baidu = {
@@ -222,12 +226,11 @@ export const ByteDance = {
 export const Alibaba = {
   ExampleEndpoint: ALIBABA_BASE_URL,
   ChatPath: (modelName: string) => {
-     if (modelName.includes("vl") || modelName.includes("omni")) {
-       return "v1/services/aigc/multimodal-generation/generation";
+     if (modelName.includes("wanx") || modelName.includes("omni")) {
+       return "v1/services/aigc/text2image/image-synthesis";
      }
-     return `v1/services/aigc/text-generation/generation`;
+     return `compatible-mode/v1/chat/completions`;
    },
-   ChatPath: "compatible-mode/v1/chat/completions",
 };
 
 export const Tencent = {
