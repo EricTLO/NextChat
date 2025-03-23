@@ -72,7 +72,7 @@ type StateMerger = {
 //合并策略，这个对象定义了不同状态存储的合并策略。
 const MergeStates: StateMerger = {
   [StoreKey.Chat]: (localState, remoteState) => {
-    // merge sessions
+    // merge sessions 合并会话
     const localSessions: Record<string, ChatSession> = {};
     localState.sessions.forEach((s) => (localSessions[s.id] = s));
 
@@ -81,11 +81,19 @@ const MergeStates: StateMerger = {
       if (remoteSession.messages.length === 0) return;
 
       const localSession = localSessions[remoteSession.id];
-      if (!localSession) {
-        // if remote session is new, just merge it
+       if (localSession && localSession.isDeleted) {
+        // 如果本地会话被标记为删除，则在远程状态中也标记为删除
+        remoteSession.isDeleted = true;
+      } else if (!localSession && !remoteSession.isDeleted) {
+        // 如果远程会话是新的，且没有被标记为删除的会话，则添加到本地
         localState.sessions.push(remoteSession);
-      } else {
-        // if both have the same session id, merge the messages
+      }else if (!localSession && remoteSession.isDeleted) {
+        // 如果远程会话是新的，但被标记为删除的会话，则跳过
+        return;
+      }    
+       else {
+          // if both have the same session id, merge the messages
+         //如果本地和远端都有消息，合并消息内容
         const localMessageIds = new Set(localSession.messages.map((v) => v.id));
         remoteSession.messages.forEach((m) => {
           if (!localMessageIds.has(m.id)) {
@@ -97,6 +105,9 @@ const MergeStates: StateMerger = {
         localSession.messages.sort(
           (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
         );
+
+         // 移除标记为删除的会话，可行性?
+        localState.sessions = localState.sessions.filter((s) => !s.isDeleted);
       }
     });
 
