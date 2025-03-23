@@ -163,14 +163,9 @@ export class GeminiProApi implements LLMApi {
       },
       
       //------------------------------------------------useSearchGrounding: true,开启谷歌联网搜索功能-------------------------------------------------------
-        tools: [
+        tools": [
           {
-            google_search_retrieval: {
-              dynamic_retrieval_config: {
-                mode: "MODE_DYNAMIC",
-                dynamic_threshold: 1,
-              }
-            }
+              "google_search": {}
           }
       ],
       //------------------------------------------------useSearchGrounding: true,开启谷歌联网搜索功能-------------------------------------------------------
