@@ -1,4 +1,4 @@
-[
+/*[
   {
     "id": "dalle3",
     "name": "Dalle3",
@@ -14,4 +14,4 @@
     "name": "DuckDuckGoLiteSearch",
     "schema": "https://ghp.ci/https://raw.githubusercontent.com/ChatGPTNextWeb/NextChat-Awesome-Plugins/main/plugins/duckduckgolite/openapi.json"
   }
-]
+]*/
