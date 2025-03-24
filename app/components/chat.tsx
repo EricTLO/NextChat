@@ -1062,7 +1062,7 @@ function _Chat() {
   type RenderMessage = ChatMessage & { preview?: boolean };
   const lastSyncTimeRef = useRef<number | null>(null); // 存储上次同步的时间
   const syncInterval = 1 * 60 * 1000; // 5 分钟
-  const syncDelay = 15 * 1000; // 10 秒延迟
+  const syncDelay = 45 * 1000; // 10 秒延迟
   const syncStore = useSyncStore();
   const { autoSyncEnabled: autoSyncEnabledFromConfig, setLastSyncTime } = useAppConfig();
   const chatStore = useChatStore();
