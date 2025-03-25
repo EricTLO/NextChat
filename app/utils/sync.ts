@@ -130,7 +130,7 @@ const MergeStates: StateMerger = {
     };
     return localState;
   },
-  [StoreKey.Config]: mergeWithUpdate<AppState[StoreKey.Config]>,
+  //[StoreKey.Config]: mergeWithUpdate<AppState[StoreKey.Config]>,暂时注释这个配置-------------------------------
   [StoreKey.Access]: mergeWithUpdate<AppState[StoreKey.Access]>,
 };
 
