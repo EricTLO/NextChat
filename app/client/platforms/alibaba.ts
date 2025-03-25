@@ -126,8 +126,8 @@ export class QwenApi implements LLMApi {
     const shouldStream = !!options.config.stream;
     const requestPayload: RequestPayload = {
       model: modelConfig.model,  
-      messages：messages,
-      stream: true, // 移到这里
+      messages:messages,
+      stream:true, // 移到这里
       input: {     
       },
       parameters: {
