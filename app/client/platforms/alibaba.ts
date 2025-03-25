@@ -59,6 +59,7 @@ interface RequestPayload {
     role: "system" | "user" | "assistant";
     content: string | MultimodalContent[];
   }[];
+  stream: boolean; // 添加 stream 属性
   parameters: RequestParam;
 }
 
@@ -124,16 +125,17 @@ export class QwenApi implements LLMApi {
     const shouldStream = !!options.config.stream;
     const requestPayload: RequestPayload = {
       model: modelConfig.model,
-      input: {
+      messages: messages,
+      stream: true, // 移到这里
+      /*input: {
         messages,
-      },
+      },*/
       parameters: {
         result_format: "message",
         incremental_output: shouldStream,
         temperature: modelConfig.temperature,
         // max_tokens: modelConfig.max_tokens,
         top_p: modelConfig.top_p === 1 ? 0.99 : modelConfig.top_p, // qwen top_p is should be < 1
-        stream: True,
       },
     };
 
