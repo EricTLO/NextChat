@@ -349,7 +349,7 @@ export const useChatStore = createPersistStore(
         // 标记会话为删除，而不是直接从数组中移除
         deletedSession.isDeleted = true;        
         
-        sessions.splice(index, 1);
+        //sessions.splice(index, 1);
 
         const currentIndex = get().currentSessionIndex;
         let nextIndex = Math.min(
