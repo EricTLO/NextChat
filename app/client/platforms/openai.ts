@@ -69,6 +69,7 @@ export interface RequestPayload {
   top_p: number;
   max_tokens?: number;
   max_completion_tokens?: number;
+  web_search?: boolean; // 添加 web_search 属性
 }
 
 
