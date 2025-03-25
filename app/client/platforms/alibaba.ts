@@ -55,6 +55,7 @@ interface RequestParam {
 }
 interface RequestPayload {
   model: string;
+  input: any;
   messages: {
     role: "system" | "user" | "assistant";
     content: string | MultimodalContent[];
@@ -124,12 +125,11 @@ export class QwenApi implements LLMApi {
 
     const shouldStream = !!options.config.stream;
     const requestPayload: RequestPayload = {
-      model: modelConfig.model,
-      messages: messages,
+      model: modelConfig.model,  
+      messages：messages,
       stream: true, // 移到这里
-      /*input: {
-        messages,
-      },*/
+      input: {     
+      },
       parameters: {
         result_format: "message",
         incremental_output: shouldStream,
@@ -248,8 +248,8 @@ export class QwenApi implements LLMApi {
             toolCallMessage: any,
             toolCallResult: any[],
           ) => {
-            requestPayload?.input?.messages?.splice(
-              requestPayload?.input?.messages?.length,
+            requestPayload?.messages?.splice(
+              requestPayload?.messages?.length,
               0,
               toolCallMessage,
               ...toolCallResult,
