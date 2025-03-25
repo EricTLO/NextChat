@@ -130,7 +130,10 @@ const MergeStates: StateMerger = {
     };
     return localState;
   },
-  //[StoreKey.Config]: mergeWithUpdate<AppState[StoreKey.Config]>,暂时注释这个配置-------------------------------
+    [StoreKey.Config]: (localState, remoteState) => {
+    // 什么都不做，阻止 Config 的合并
+    return localState; // 或者 return remoteState;  取决于你想要保留哪个状态
+  },
   [StoreKey.Access]: mergeWithUpdate<AppState[StoreKey.Access]>,
 };
 
