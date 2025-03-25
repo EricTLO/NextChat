@@ -226,7 +226,7 @@ export const ByteDance = {
 export const Alibaba = {
   ExampleEndpoint: ALIBABA_BASE_URL,
   ChatPath: (modelName: string) => {
-     if (modelName.includes("wanx") || modelName.includes("omni")) {
+     if (modelName.includes("wanx")) {
        return "v1/services/aigc/text2image/image-synthesis";
      }
      return `compatible-mode/v1/chat/completions`;
