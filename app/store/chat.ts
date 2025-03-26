@@ -348,6 +348,16 @@ export const useChatStore = createPersistStore(
         
         // 标记会话为删除，而不是直接从数组中移除
         //deletedSession.isDeleted = true;        
+        // ============= 新增代码开始 =============
+  // 记录被删除的会话ID到持久化存储
+  const deletedSessionId = deletedSession.id;
+  const deletedIds = JSON.parse(localStorage.getItem('deletedChatIds') || '[]');
+  
+  if (!deletedIds.includes(deletedSessionId)) {
+    deletedIds.push(deletedSessionId);
+    localStorage.setItem('deletedChatIds', JSON.stringify(deletedIds));
+  }
+  // ============= 新增代码结束 =============
         
         sessions.splice(index, 1);
 
