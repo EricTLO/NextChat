@@ -72,141 +72,60 @@ type StateMerger = {
 //合并策略，这个对象定义了不同状态存储的合并策略。
 const MergeStates: StateMerger = {
   [StoreKey.Chat]: (localState, remoteState) => {
-    // 我们将基于 localState 构建一个 Map，但值为 session 的浅拷贝
-    const sessionMap = new Map<string, ChatSession>(
-        localState.sessions.map(session => [session.id, { ...session }]) // 创建 session 的浅拷贝
+      // 1. 记录曾经存在但被删除的会话ID（需要持久化存储）
+    const persistentDeletedIds = JSON.parse(
+      localStorage.getItem('deletedChatIds') || '[]'
     );
+    const deletedIds = new Set(persistentDeletedIds);
 
     
-    /* merge sessions 合并会话
+     merge sessions 合并会话
     const localSessions: Record<string, ChatSession> = {};
-    localState.sessions.forEach((s) => (localSessions[s.id] = s));*/
-
+    localState.sessions.forEach((s) => (localSessions[s.id] = s));
+  
     remoteState.sessions.forEach((remoteSession) => {
-      // skip empty chats跳过空会话
-      if (remoteSession.messages.length === 0) return;
+      // 跳过条件：空会话 或 被"删除"的会话（新增判断）
+      if (remoteSession.messages.length === 0 || deletedIds.has(remoteSession.id)) {return;}
       
-      //-------------------------------------------新的同策略START----------------------------------------------------
-      const remoteSessionCopy = { ...remoteSession }; // 创建远程会话的浅拷贝
-      const existingSessionCopy = sessionMap.get(remoteSessionCopy.id);
-      if (remoteSessionCopy.isDeleted) {
-            // 处理远程删除: 如果本地存在，标记删除或直接从 Map 中移除
-            if (existingSessionCopy) {
-                 // 选项 A: 标记删除 (如果你需要保留记录)
-                 existingSessionCopy.isDeleted = true;
-                 // sessionMap.set(existingSessionCopy.id, existingSessionCopy); // 可选，因为对象已在 Map 中
-
-                 // 选项 B: 直接移除 (如果不需要保留已删除的)
-                 // sessionMap.delete(existingSessionCopy.id);
-            }
-            // 如果本地不存在且远程已删除，则忽略
-
-        } else if (existingSessionCopy?.isDeleted) {
-             // 处理本地已删除: 根据你的策略决定，是保留删除状态还是允许远程覆盖？
-             // 示例：保留本地删除状态 (不做操作，因为 existingSessionCopy 已标记)
-             // 或者，如果你想让未删除的远程覆盖本地删除:
-             // existingSessionCopy.isDeleted = false; // 取消删除标记
-             // 然后继续下面的合并逻辑... (当前代码是直接跳过合并)
-
-             // --- 你的原始代码逻辑是让 remote 也标记删除 ---
-             // remoteSessionCopy.isDeleted = true; // 在拷贝上标记，但这似乎没必要，因为最终是以 map 为准
-
-        } else if (!existingSessionCopy) {
-             // 本地没有，远程有且未删除: 添加远程会话的拷贝到 Map
-             sessionMap.set(remoteSessionCopy.id, remoteSessionCopy);
-
-        } else {
-             // 本地和远程都存在，且都未标记删除: 合并消息
-             const localMessages = existingSessionCopy.messages || [];
-             const remoteMessages = remoteSessionCopy.messages || [];
-             const localMessageIds = new Set(localMessages.map((v) => v.id));
-
-             // --- 修改点 2: 创建新的消息数组 ---
-             const mergedMessages = [
-                 ...localMessages, // 先包含所有本地消息
-                 // 添加远程有但本地没有的消息
-                 ...remoteMessages.filter((m) => !localMessageIds.has(m.id))
-             ];
-
-             // --- 修改点 3: 在新数组上排序 ---
-             // 注意：sort 会修改原数组，但 mergedMessages 已经是新创建的了
-             mergedMessages.sort(
-                 (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
-             );
-
-             // --- 修改点 4: 更新 Map 中的 session 拷贝 ---
-             // 使用新的消息数组更新 existingSessionCopy
-             existingSessionCopy.messages = mergedMessages;
-             // 可以考虑更新 lastUpdate 时间戳等
-             existingSessionCopy.lastUpdate = remoteSessionCopy.lastUpdate > existingSessionCopy.lastUpdate
-                                              ? remoteSessionCopy.lastUpdate
-                                              : existingSessionCopy.lastUpdate;
-
-            // sessionMap.set(existingSessionCopy.id, existingSessionCopy); // 可选，因为对象已在 Map 中
-        }
-        //-------------------------------------------新的同策略END----------------------------------------------------
-
-
-      
-      /*
-      const localSession = localSessions[remoteSession.id];
-       if (remoteSession.isDeleted) {        
-      
-      }else if (localSession?.isDeleted) {
-         remoteSession.isDeleted = true;
-        
-      }else if (!localSession && !remoteSession.isDeleted) {
-         localState.sessions.push(remoteSession);
-      }else {
-          // if both have the same session id, merge the messages
-         //如果本地和远端都有消息，合并消息内容
+     const localSession = localSessions[remoteSession.id];
+      if (!localSession) {
+        // if remote session is new, just merge it
+        localState.sessions.push(remoteSession);
+      } else {
+        // if both have the same session id, merge the messages
         const localMessageIds = new Set(localSession.messages.map((v) => v.id));
         remoteSession.messages.forEach((m) => {
           if (!localMessageIds.has(m.id)) {
             localSession.messages.push(m);
-          }*/
+          }
+        });
 
-      
-        //});
-           
-    
-    
-        /* sort local messages with date field in asc order
+        // sort local messages with date field in asc order
         localSession.messages.sort(
           (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
-        );*/
-
-         /* 移除标记为删除的会话，可行性?
-        localState.sessions = localState.sessions.filter((s) => !s.isDeleted);*/
-      //},
+        );
+      }
     });
 
-    /* sort local sessions with date field in desc order
+    
+    /*3. 更新删除记录（新增逻辑）
+    const currentLocalIds = new Set(localState.sessions.map(s => s.id));
+    remoteState.sessions.forEach(s => {
+      if (!currentLocalIds.has(s.id) && s.messages.length > 0) {
+        deletedIds.add(s.id); // 记录本地不存在但远程有的有效会话
+      }
+    });
+    localStorage.setItem('deletedChatIds', JSON.stringify([...deletedIds]));*/ 
+
+    
+    // sort local sessions with date field in desc order
     localState.sessions.sort(
       (a, b) =>
         new Date(b.lastUpdate).getTime() - new Date(a.lastUpdate).getTime(),
     );
 
-    return localState;*/
-    // --- 修改点 5: 从 Map 生成最终的 sessions 数组 ---
-        let finalSessions = Array.from(sessionMap.values());
-        // --- 修改点 6: 在新数组上过滤 ---
-        finalSessions = finalSessions.filter((s) => !s.isDeleted); // 移除标记为删除的会话
-        // --- 修改点 7: 在新数组上排序 ---
-        // 注意：sort 会修改原数组，但 finalSessions 已经是上一步 filter 产生的新数组了
-        finalSessions.sort(
-          (a, b) =>
-            new Date(b.lastUpdate).getTime() - new Date(a.lastUpdate).getTime(),
-        );
-        // --- 修改点 8: 返回包含新 sessions 数组的新 state 对象 ---
-    return {
-      ...localState, // 包含 localState 的其他属性（如果有的话）
-      sessions: finalSessions, // 使用最终处理过的新数组
-    };
-
-
-
-
+    return localState;
+  
   },
   [StoreKey.Prompt]: (localState, remoteState) => {
     localState.prompts = {
