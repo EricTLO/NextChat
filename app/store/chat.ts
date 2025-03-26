@@ -347,7 +347,7 @@ export const useChatStore = createPersistStore(
         const sessions = get().sessions.slice();
         
         // 标记会话为删除，而不是直接从数组中移除
-        deletedSession.isDeleted = true;        
+        //deletedSession.isDeleted = true;        
         
         sessions.splice(index, 1);
 
