@@ -191,8 +191,8 @@ const MergeStates: StateMerger = {
 
          /* 移除标记为删除的会话，可行性?
         localState.sessions = localState.sessions.filter((s) => !s.isDeleted);*/
-      };
-    //});
+      //},
+    });
 
     /* sort local sessions with date field in desc order
     localState.sessions.sort(
