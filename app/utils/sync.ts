@@ -275,7 +275,7 @@ export function mergeAppState(localState: AppState, remoteState: AppState) {
 /**
  * Merge state with `lastUpdateTime`, older state will be override
  */
-
+/*
 export function mergeWithUpdate<T extends { lastUpdateTime?: number }>(
   localState: T,
   remoteState: T,
@@ -305,11 +305,11 @@ export function mergeWithUpdate<T extends { lastUpdateTime?: number }>(
 
   // 返回被合并和修改后的 baseState (它已经是拷贝了)
   return baseState;
-}
+}*/
 
 
 
-/*
+
 export function mergeWithUpdate<T extends { lastUpdateTime?: number }>(
   localState: T,
   remoteState: T,
@@ -324,4 +324,4 @@ export function mergeWithUpdate<T extends { lastUpdateTime?: number }>(
     merge(localState, remoteState);
     return { ...localState };
   }
-}*/
+}
