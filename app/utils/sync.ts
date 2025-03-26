@@ -282,7 +282,7 @@ export function mergeWithUpdate<T extends { lastUpdateTime?: number }>(
 ) {
   const localUpdateTime = localState.lastUpdateTime ?? 0;
   // --- 修改点 14: 修复读取 remoteUpdateTime 的 bug ---
-  const remoteUpdateTime = remoteState.lastUpdateTime ?? 0; // 默认值建议统一
+  const remoteUpdateTime = localState.lastUpdateTime ?? 1; // 默认值建议统一
 
   // 决定哪个是基础 (base)，哪个是源 (source)
   let baseState: T;
