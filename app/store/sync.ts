@@ -169,11 +169,16 @@ export const useSyncStore = createPersistStore(
       const compressedData = await compress(jsonString); // 压缩数据
       await client.set(config.username, compressedData.toString('latin1')); // 上传压缩后的数据 (以latin1编码)
       console.log("[Sync] 成功上传本地状态到云端.");
+      setLocalAppState(localState);
+       console.log("[Sync] 成功刷新setLocalAppState JSON.");
     } catch (uploadError) {
       console.error("[Sync] 上传本地状态到云端失败，用户名密码不对或者无法连接:", uploadError);
       
       throw uploadError; // 抛出错误，阻止后续操作
     }  
+    setLocalAppState({ ...localState }); // 创建新对象触发渲染
+    console.log("[Sync] 状态已更新，触发UI刷新");
+
     
   } catch (e) {
       console.log("[Sync] sync failed 上传失败", e);
