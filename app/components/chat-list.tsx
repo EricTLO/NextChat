@@ -93,6 +93,10 @@ export function ChatItem(props: {
 }) {
   const draggableRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
+    // 对于临时调试，直接放在函数体也可能行，但 useEffect 更规范
+    (window as any).fixMyIndex = fixCurrentSessionIndex;
+    console.log("fixMyIndex function is now available in the console.");
+    
     if (props.selected && draggableRef.current) {
       draggableRef.current?.scrollIntoView({
         block: "center",
