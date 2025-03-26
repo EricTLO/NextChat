@@ -101,7 +101,7 @@ export const BOT_HELLO: ChatMessage = createMessage({
   content: Locale.Store.BotHello,
 });
 
-function createEmptySession(): ChatSession {
+export function createEmptySession(): ChatSession {
   return {
     id: nanoid(),
     topic: DEFAULT_TOPIC,
