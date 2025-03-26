@@ -130,10 +130,7 @@ const MergeStates: StateMerger = {
     };
     return localState;
   },
-    [StoreKey.Config]: (localState, remoteState) => {
-    // 什么都不做，阻止 Config 的合并
-    return localState; // 或者 return remoteState;  取决于你想要保留哪个状态
-  },
+  [StoreKey.Config]: mergeWithUpdate<AppState[StoreKey.Config]>,
   [StoreKey.Access]: mergeWithUpdate<AppState[StoreKey.Access]>,
 };
 
@@ -172,7 +169,7 @@ export function mergeWithUpdate<T extends { lastUpdateTime?: number }>(
   remoteState: T,
 ) {
   const localUpdateTime = localState.lastUpdateTime ?? 0;
-  const remoteUpdateTime = localState.lastUpdateTime ?? 1;
+  const remoteUpdateTime = remoteState.lastUpdateTime ?? 1;
 
   if (localUpdateTime < remoteUpdateTime) {
     merge(remoteState, localState);
