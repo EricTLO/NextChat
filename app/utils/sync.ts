@@ -243,7 +243,8 @@ export function mergeWithUpdate<T extends { lastUpdateTime?: number }>(
   } else {
     merge(localState, remoteState);
     localState.lastUpdateTime = Date.now();
-    console.log('2.localState.lastUpdateTime时间更新了，现在是merge(localState, remoteState)函数:', localState.lastUpdateTime);
+    console.log('2.localState.lastUpdateTime时间更新了，现在是merge(localState, remoteState)函数，现在localState时间:', localState.lastUpdateTime);
+    console.log('现在remoteState时间:', remoteState.lastUpdateTime);
     return { ...localState };
   }
 }
