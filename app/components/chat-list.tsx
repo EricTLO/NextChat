@@ -20,7 +20,7 @@ import { showConfirm } from "./ui-lib";
 import { useMobileScreen } from "../utils";
 import clsx from "clsx";
 // 在你的某个组件文件或者一个工具文件中引入 store
-import { createEmptySession } from "../store"; // 根据你的实际路径修改
+import { createEmptySession } from "../store/chat"; // 根据你的实际路径修改
 
 // 定义一个修复函数
 function fixCurrentSessionIndex() {
