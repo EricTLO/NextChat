@@ -19,7 +19,72 @@ import { useRef, useEffect } from "react";
 import { showConfirm } from "./ui-lib";
 import { useMobileScreen } from "../utils";
 import clsx from "clsx";
+// 在你的某个组件文件或者一个工具文件中引入 store
+import { createEmptySession } from "../store"; // 根据你的实际路径修改
 
+// 定义一个修复函数
+function fixCurrentSessionIndex() {
+  const { sessions, set } = useChatStore.getState(); // 获取当前状态和 set 方法
+
+  // 1. 获取当前完整的 sessions 列表
+  const currentFullSessions = sessions;
+
+  // 2. 筛选出可见的会话
+  const visibleSessions = currentFullSessions.filter(session => !session.isDeleted);
+
+  console.log("Current full sessions count:", currentFullSessions.length);
+  console.log("Visible sessions count:", visibleSessions.length);
+
+  // 3. 如果存在可见会话
+  if (visibleSessions.length > 0) {
+    // 3.1 获取第一个可见会话
+    const firstVisibleSession = visibleSessions[0];
+
+    // 3.2 在完整列表中找到它的真实索引 (使用 ID 查找更可靠)
+    const correctIndex = currentFullSessions.findIndex(session => session.id === firstVisibleSession.id);
+
+    // 3.3 如果找到了索引 (应该总能找到)
+    if (correctIndex !== -1) {
+      console.log(`Found first visible session: ID=${firstVisibleSession.id}, Topic=${firstVisibleSession.topic}`);
+      console.log(`Its correct index in the full list is: ${correctIndex}`);
+      console.log(`Updating currentSessionIndex to ${correctIndex}`);
+
+      // 更新 Zustand store 的状态
+      set({ currentSessionIndex: correctIndex });
+
+      console.log("Index updated successfully.");
+    } else {
+      console.error("Error: Could not find the first visible session in the full sessions list. This shouldn't happen.");
+      // 可以添加一个备用逻辑，比如默认选中完整列表的第一个
+      if (currentFullSessions.length > 0) {
+          set({ currentSessionIndex: 0 });
+          console.warn("Fallback: Set index to 0.");
+      } else {
+          // 如果连完整列表都是空的（理论上不可能，因为我们检查了 visibleSessions.length > 0）
+           set({ currentSessionIndex: -1 });
+           console.warn("Fallback: Set index to -1 (empty list).");
+      }
+    }
+  } else {
+    // 4. 如果不存在可见会话
+    console.log("No visible sessions found. Resetting to a new empty session.");
+    const newEmptySession = createEmptySession();
+    set({
+      sessions: [newEmptySession], // 替换为只包含新会话的数组
+      currentSessionIndex: 0,      // 选中这个新会话
+    });
+    console.log("Sessions reset to a single empty session.");
+  }
+}
+
+// --- 如何调用这个函数 ---
+// 方式一：在浏览器控制台调用 (需要确保这个函数在你的某个组件或全局作用域中可访问)
+// window.fixMyIndex = fixCurrentSessionIndex; // 在组件中挂载到 window
+// 然后在控制台输入: fixMyIndex()
+
+// 方式二：临时添加一个按钮来调用
+// 在你的某个组件的 JSX 中:
+// <button onClick={fixCurrentSessionIndex}>修复索引</button>
 export function ChatItem(props: {
   onClick?: () => void;
   onDelete?: () => void;
