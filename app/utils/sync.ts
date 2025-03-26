@@ -168,21 +168,8 @@ const MergeStates: StateMerger = {
 
       
         //});
-           // --- 修改点 5: 从 Map 生成最终的 sessions 数组 ---
-        let finalSessions = Array.from(sessionMap.values());
-        // --- 修改点 6: 在新数组上过滤 ---
-        finalSessions = finalSessions.filter((s) => !s.isDeleted); // 移除标记为删除的会话
-        // --- 修改点 7: 在新数组上排序 ---
-        // 注意：sort 会修改原数组，但 finalSessions 已经是上一步 filter 产生的新数组了
-        finalSessions.sort(
-          (a, b) =>
-            new Date(b.lastUpdate).getTime() - new Date(a.lastUpdate).getTime(),
-        );
-        // --- 修改点 8: 返回包含新 sessions 数组的新 state 对象 ---
-    return {
-      ...localState, // 包含 localState 的其他属性（如果有的话）
-      sessions: finalSessions, // 使用最终处理过的新数组
-    };
+           
+    
     
         /* sort local messages with date field in asc order
         localSession.messages.sort(
@@ -201,7 +188,21 @@ const MergeStates: StateMerger = {
     );
 
     return localState;*/
-    
+    // --- 修改点 5: 从 Map 生成最终的 sessions 数组 ---
+        let finalSessions = Array.from(sessionMap.values());
+        // --- 修改点 6: 在新数组上过滤 ---
+        finalSessions = finalSessions.filter((s) => !s.isDeleted); // 移除标记为删除的会话
+        // --- 修改点 7: 在新数组上排序 ---
+        // 注意：sort 会修改原数组，但 finalSessions 已经是上一步 filter 产生的新数组了
+        finalSessions.sort(
+          (a, b) =>
+            new Date(b.lastUpdate).getTime() - new Date(a.lastUpdate).getTime(),
+        );
+        // --- 修改点 8: 返回包含新 sessions 数组的新 state 对象 ---
+    return {
+      ...localState, // 包含 localState 的其他属性（如果有的话）
+      sessions: finalSessions, // 使用最终处理过的新数组
+    };
 
 
 
