@@ -233,13 +233,17 @@ export function mergeWithUpdate<T extends { lastUpdateTime?: number }>(
   remoteState: T,
 ) {
   const localUpdateTime = localState.lastUpdateTime ?? 0;
-  const remoteUpdateTime = localState.lastUpdateTime ?? 1;
+  const remoteUpdateTime = remoteState.lastUpdateTime ?? 1;
 
-  if (localUpdateTime < remoteUpdateTime) {
+  if (localUpdateTime > remoteUpdateTime) {
     merge(remoteState, localState);
+    remoteState.lastUpdateTime = Date.now();
+    console.log('1.remoteState.lastUpdateTime时间更新了，现在是merge(remoteState, localState)函数:', remoteState.lastUpdateTime);
     return { ...remoteState };
   } else {
     merge(localState, remoteState);
+    localState.lastUpdateTime = Date.now();
+    console.log('2.localState.lastUpdateTime时间更新了，现在是merge(localState, remoteState)函数:', localState.lastUpdateTime);
     return { ...localState };
   }
 }
