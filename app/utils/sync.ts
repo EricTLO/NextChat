@@ -275,6 +275,41 @@ export function mergeAppState(localState: AppState, remoteState: AppState) {
 /**
  * Merge state with `lastUpdateTime`, older state will be override
  */
+
+export function mergeWithUpdate<T extends { lastUpdateTime?: number }>(
+  localState: T,
+  remoteState: T,
+) {
+  const localUpdateTime = localState.lastUpdateTime ?? 0;
+  // --- 修改点 14: 修复读取 remoteUpdateTime 的 bug ---
+  const remoteUpdateTime = remoteState.lastUpdateTime ?? 0; // 默认值建议统一
+
+  // 决定哪个是基础 (base)，哪个是源 (source)
+  let baseState: T;
+  let sourceState: T;
+
+  if (localUpdateTime < remoteUpdateTime) {
+      // 远程更新，以远程为基础，合并本地的进去
+      baseState = { ...remoteState }; // 创建远程的拷贝作为基础
+      sourceState = localState;
+  } else {
+      // 本地更新或一样新，以本地为基础，合并远程的进去
+      baseState = { ...localState }; // 创建本地的拷贝作为基础
+      sourceState = remoteState;
+  }
+
+  // 调用 merge 函数将 source 合并到 baseState 的拷贝中
+  // 假设 merge(target, source) 修改 target
+  // 警告：这里的 merge 仍然是之前的版本，有安全隐患且数组处理可能不符合预期！
+  merge(baseState, sourceState);
+
+  // 返回被合并和修改后的 baseState (它已经是拷贝了)
+  return baseState;
+}
+
+
+
+/*
 export function mergeWithUpdate<T extends { lastUpdateTime?: number }>(
   localState: T,
   remoteState: T,
@@ -289,4 +324,4 @@ export function mergeWithUpdate<T extends { lastUpdateTime?: number }>(
     merge(localState, remoteState);
     return { ...localState };
   }
-}
+}*/
