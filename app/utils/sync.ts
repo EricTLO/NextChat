@@ -73,13 +73,12 @@ type StateMerger = {
 const MergeStates: StateMerger = {
   [StoreKey.Chat]: (localState, remoteState) => {
       // 1. 记录曾经存在但被删除的会话ID（需要持久化存储）
-    const persistentDeletedIds = JSON.parse(
-      localStorage.getItem('deletedChatIds') || '[]'
+    const deletedIds = new Set(
+      JSON.parse(localStorage.getItem('deletedChatIds') || '[]')
     );
-    const deletedIds = new Set(persistentDeletedIds);
 
     
-     merge sessions 合并会话
+     //merge sessions 合并会话
     const localSessions: Record<string, ChatSession> = {};
     localState.sessions.forEach((s) => (localSessions[s.id] = s));
   
