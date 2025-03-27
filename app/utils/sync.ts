@@ -233,17 +233,25 @@ export function mergeWithUpdate<T extends { lastUpdateTime?: number }>(
   remoteState: T,
 ) {
   const localUpdateTime = localState.lastUpdateTime ?? 0;
-  const remoteUpdateTime = remoteState.lastUpdateTime ?? 1;
-
+  const remoteUpdateTime = remoteState.lastUpdateTime ?? 0;
+  console.log('现在合并之前的localUpdateTime是:', localUpdateTime);
+  console.log('现在合并之前的remoteUpdateTime是:', remoteUpdateTime);
+  
   if (localUpdateTime > remoteUpdateTime) {
     merge(remoteState, localState);
+    console.log('现在是merge(remoteState, localState);函数，【更新前】localUpdateTime:', localUpdateTime);
+    console.log('现在是merge(remoteState, localState);函数，【更新前】remoteUpdateTime:', remoteUpdateTime);
     remoteState.lastUpdateTime = Date.now();
-    console.log('1.remoteState.lastUpdateTime时间更新了，现在是merge(remoteState, localState)函数:', remoteState.lastUpdateTime);
+    console.log('remoteState.lastUpdateTimee时间更新了，现在是【更新后】merge(localState, remoteState)函数，现在remoteState.lastUpdateTime时间:', remoteState.lastUpdateTime);
     return { ...remoteState };
   } else {
     merge(localState, remoteState);
+    console.log('现在是merge(localState, remoteState)函数，【更新前】localUpdateTime:', localUpdateTime);
+    console.log('现在是merge(localState, remoteState)函数，【更新前】remoteUpdateTime:', remoteUpdateTime);
+    console.log('现在是merge(localState, remoteState)函数，【更新前】localState.lastUpdateTime时间:', localState.lastUpdateTime);
+    console.log('现在是merge(localState, remoteState)函数，【更新前】remoteState.lastUpdateTime时间:', remoteState.lastUpdateTime);
     localState.lastUpdateTime = Date.now();
-    console.log('2.localState.lastUpdateTime时间更新了，现在是merge(localState, remoteState)函数，现在localState时间:', localState.lastUpdateTime);
+    console.log('localState.lastUpdateTime时间更新了，现在是【更新后】merge(localState, remoteState)函数，现在localState.lastUpdateTime时间:', localState.lastUpdateTime);
     console.log('现在remoteState时间:', remoteState.lastUpdateTime);
     return { ...localState };
   }
