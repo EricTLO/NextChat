@@ -204,22 +204,24 @@ export class QwenApi implements LLMApi {
                 return { isThinking: false, content: "[解析响应错误]" };
               }
             
-              // --- 加入这个关键的检查 ---
-              // 检查 json 对象是否存在，以及它是否包含 output 和 output.choices
-              if (!json || typeof json.output !== 'object' || !Array.isArray(json.output.choices)) {
-                // 如果没有 output.choices，就打印一个警告（方便调试，看看是啥样的块）
-                console.warn("收到的SSE块没有预期的 output.choices 结构:", json);
+              // --- 修改这里的检查逻辑 ---
+              // 现在我们直接检查 json.choices 是否是一个数组
+              if (!json || !Array.isArray(json.choices)) {
+                // 如果没有 json.choices，打印日志并检查是否是错误或结束块
+                console.warn("收到的SSE块没有预期的 choices 结构 (直接在顶层):", json);
             
-                // 这里可以进一步判断：
-                // 1. 是否是包含错误信息的块？
                 if (json.code && json.message) {
                     console.error("DashScope API 流式传输错误:", json);
-                    return { isThinking: false, content: `[API错误: ${json.message}]` }; // 可以显示错误信息
+                    return { isThinking: false, content: `[API错误: ${json.message}]` };
                 }
-                // 2. 是否是包含使用量(usage)的结束块？（如果需要处理usage可以在这里加逻辑）
-                // if (json.usage) { ... }
+                // 你可以检查是否有 usage 字段来判断是否是结束块
+                if (json.usage) {
+                    console.log("收到包含 usage 的结束块:", json);
+                    // 这里通常可以安全返回空，表示内容流结束
+                    return { isThinking: false, content: "" };
+                }
             
-                // 如果都不是，就认为它是一个非内容块（比如结束信号），安全地返回空内容
+                // 其他未知结构，也返回空
                 return { isThinking: false, content: "" };
               }
               // --- 检查结束 ---
@@ -228,12 +230,20 @@ export class QwenApi implements LLMApi {
 
 
             
-            const choices = json.output.choices as Array<{
+            //const choices = json.output.choices as Array<{
+            const choices = json.choices as Array<{
               message: {
                 content: string | null | MultimodalContentForAlibaba[];
                 tool_calls: ChatMessageTool[];
                 reasoning_content: string | null;
               };
+              delta?: { // 兼容 delta 结构
+              content?: string | null;
+              tool_calls?: ChatMessageTool[];
+              reasoning_content?: string | null;
+              
+            };
+              finish_reason?: string; // 结束原因
             }>;
 
 
@@ -246,11 +256,40 @@ export class QwenApi implements LLMApi {
 
             
 
-            if (!choices?.length) return { isThinking: false, content: "" };
+            if (!choices?.length) return {
+              console.log("收到的SSE块 choices 数组为空:", json);
+              isThinking: false, content: "" };
 
-            const tool_calls = choices[0]?.message?.tool_calls;
+
+
+            // --- 从 choices[0] 中提取信息 ---
+              // 需要同时考虑 message 和 delta 两种可能的结构
+              const firstChoice = choices[0];
+              const message = firstChoice.message;
+              const delta = firstChoice.delta;
+            
+              // 优先从 delta 获取，其次从 message 获取（流式响应通常用 delta）
+              const tool_calls = delta?.tool_calls ?? message?.tool_calls;
+              const reasoning = delta?.reasoning_content ?? message?.reasoning_content;
+              let content = delta?.content ?? message?.content; // content 可能是字符串或数组
+
+
+
+
+
+
+            
+            //const tool_calls = choices[0]?.message?.tool_calls;
             if (tool_calls?.length > 0) {
-              const index = tool_calls[0]?.index;
+              //const index = tool_calls[0]?.index;
+
+
+               const toolCall = tool_calls[0]; // 假设每次只处理一个 tool call chunk
+              const index = (toolCall as any).index; // DashScope 可能有 index
+
+
+
+              
               const id = tool_calls[0]?.id;
               const args = tool_calls[0]?.function?.arguments;
               if (id) {
@@ -282,6 +321,14 @@ export class QwenApi implements LLMApi {
                 content: "",
               };
             }
+
+            // 检查 finish_reason，如果是 'tool_calls'，说明是工具调用结束，可能没有 content
+            if (firstChoice.finish_reason === "tool_calls") {
+               console.log("收到 tool_calls 结束标记");
+               return { isThinking: false, content: "" };
+            }
+
+        
 
             if (reasoning && reasoning.length > 0) {
               return {
