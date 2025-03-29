@@ -308,8 +308,8 @@ export class QwenApi implements LLMApi {
               }
             }
 
-            const reasoning = choices[0]?.message?.reasoning_content;
-            const content = choices[0]?.message?.content;
+            //const reasoning = choices[0]?.message?.reasoning_content;
+            /const content = choices[0]?.message?.content;
 
             // Skip if both content and reasoning_content are empty or null
             if (
