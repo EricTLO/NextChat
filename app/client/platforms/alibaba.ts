@@ -181,8 +181,53 @@ export class QwenApi implements LLMApi {
           controller,
           // parseSSE
           (text: string, runTools: ChatMessageTool[]) => {
+             console.log("原始SSE数据:", text); // 可选：取消注释这行可以在浏览器控制台看到收到的每个数据块
             // console.log("parseSSE", text, runTools);
-            const json = JSON.parse(text);
+            //const json = JSON.parse(text);
+            let json;
+            
+
+            //新的json检查---------------------------------------------------------------------
+              try {
+                // 处理可能的空行或非JSON标记（如果DashScope用的话）
+                if (!text || text.trim() === "" || text.startsWith(":")) {
+                   console.log("跳过空行或注释SSE行");
+                   return { isThinking: false, content: "" };
+                }
+                // 如果DashScope用类似 [DONE] 的标记，你可能需要在这里加特定检查
+                // 例如: if (text.includes("[DONE]")) return { isThinking: false, content: "", isDone: true };
+            
+                json = JSON.parse(text);
+              } catch (error) {
+                console.error("解析SSE JSON失败:", error, "原始文本是:", text);
+                // 处理解析错误 - 可以考虑返回一个错误提示
+                return { isThinking: false, content: "[解析响应错误]" };
+              }
+            
+              // --- 加入这个关键的检查 ---
+              // 检查 json 对象是否存在，以及它是否包含 output 和 output.choices
+              if (!json || typeof json.output !== 'object' || !Array.isArray(json.output.choices)) {
+                // 如果没有 output.choices，就打印一个警告（方便调试，看看是啥样的块）
+                console.warn("收到的SSE块没有预期的 output.choices 结构:", json);
+            
+                // 这里可以进一步判断：
+                // 1. 是否是包含错误信息的块？
+                if (json.code && json.message) {
+                    console.error("DashScope API 流式传输错误:", json);
+                    return { isThinking: false, content: `[API错误: ${json.message}]` }; // 可以显示错误信息
+                }
+                // 2. 是否是包含使用量(usage)的结束块？（如果需要处理usage可以在这里加逻辑）
+                // if (json.usage) { ... }
+            
+                // 如果都不是，就认为它是一个非内容块（比如结束信号），安全地返回空内容
+                return { isThinking: false, content: "" };
+              }
+              // --- 检查结束 ---
+              //新的json检查---------------------------------------------------------------------
+
+
+
+            
             const choices = json.output.choices as Array<{
               message: {
                 content: string | null | MultimodalContentForAlibaba[];
@@ -190,6 +235,16 @@ export class QwenApi implements LLMApi {
                 reasoning_content: string | null;
               };
             }>;
+
+
+             // （可选）增加一个 choices 是否为空数组的检查，更保险
+            if (!choices?.length) {
+               console.log("收到的SSE块 choices 数组为空:", json);
+               return { isThinking: false, content: "" };
+            }
+
+
+            
 
             if (!choices?.length) return { isThinking: false, content: "" };
 
@@ -219,7 +274,8 @@ export class QwenApi implements LLMApi {
             // Skip if both content and reasoning_content are empty or null
             if (
               (!reasoning || reasoning.length === 0) &&
-              (!content || content.length === 0)
+              (!content || content.length === 0) &&
+              !tool_calls?.length // 也要考虑只有 tool calls 的情况
             ) {
               return {
                 isThinking: false,
@@ -241,6 +297,8 @@ export class QwenApi implements LLMApi {
               };
             }
 
+
+            
             return {
               isThinking: false,
               content: "",
