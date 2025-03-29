@@ -129,13 +129,13 @@ export class QwenApi implements LLMApi {
     const requestPayload: RequestPayload = {
       model: modelConfig.model,  
       messages:messages,
-      
+      stream:true, // 移到这里
       input: {     
       },
       parameters: {
         result_format: "message",
         incremental_output: shouldStream,
-        stream:true, // 移到这里
+        
         temperature: modelConfig.temperature,
         // max_tokens: modelConfig.max_tokens,
         top_p: modelConfig.top_p === 1 ? 0.99 : modelConfig.top_p, // qwen top_p is should be < 1
@@ -148,7 +148,8 @@ export class QwenApi implements LLMApi {
     try {
       const headers = {
         ...getHeaders(),
-        "X-DashScope-SSE": shouldStream ? "enable" : "disable",
+        //"X-DashScope-SSE": shouldStream ? "enable" : "disable",
+        "X-DashScope-SSE": "enable",
       };
 
       const chatPath = this.path(Alibaba.ChatPath(modelConfig.model));
@@ -165,7 +166,7 @@ export class QwenApi implements LLMApi {
         getTimeoutMSByModel(options.config.model),
       );
 
-      if (shouldStream) {
+      if (shouldStream || true) {
         const [tools, funcs] = usePluginStore
           .getState()
           .getAsTools(
