@@ -123,7 +123,9 @@ export class QwenApi implements LLMApi {
       messages.push({ role: v.role, content });
     }
 
-    const shouldStream = !!options.config.stream;
+    //const shouldStream = !!options.config.stream;
+
+    const shouldStream = true;
     const requestPayload: RequestPayload = {
       model: modelConfig.model,  
       messages:messages,
