@@ -16,9 +16,9 @@ export function useAllModels() {
   const models = useMemo(() => {
     
           const combinedCustomModels = [
-        serverConfig.customModels, // 服务器配置优先
-        configStore.customModels,
-        accessStore.customModels
+        serverConfig.customModels // 服务器配置优先
+        //configStore.customModels,
+        //accessStore.customModels
       ]
         .filter(Boolean) // 移除空值
         .join(",");
@@ -38,7 +38,7 @@ export function useAllModels() {
     accessStore.defaultModel,
     configStore.customModels,
     configStore.models,
-    serverConfig.customModels, // 依赖项
+    //serverConfig.customModels, // 依赖项
     serverConfig.defaultModel
   ]);
 
