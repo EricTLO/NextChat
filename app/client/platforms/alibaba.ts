@@ -256,9 +256,10 @@ export class QwenApi implements LLMApi {
 
             
 
-            if (!choices?.length) return {
-              console.log("收到的SSE块 choices 数组为空:", json);
-              isThinking: false, content: "" };
+            if (!choices?.length) {
+             console.log("收到的SSE块 choices 数组为空:", json);
+             return { isThinking: false, content: "" };
+              }
 
 
 
