@@ -120,12 +120,18 @@ export const useSyncStore = createPersistStore(
     //---------------------------------------------新的sync方案---START------------------------------------------
 
     async sync() {
+    console.log("[Sync] === 同步流程开始 ===");
+      // 1. 获取初始本地状态
+  const initialLocalState = getLocalAppState();
+  console.log("[Sync] 步骤 1: 获取初始本地状态完成。");
   const localState = getLocalAppState();
   const provider = get().provider;
   const config = get()[provider];
   const client = this.getClient();
 
   try {
+    console.log("[Sync] 初始本地 Config Models:", JSON.stringify(initialLocalState[StoreKey.Config].models.map(m => m.name)));
+    console.log("[Sync] 初始本地 Config Custom Models:", JSON.stringify(initialLocalState[StoreKey.Config].customModels.map(m => m.name)));
       // 1. 从云端获取远程状态，合并本地
     console.log("[Sync] 先开始从云端获取远程状态...");
     let remoteState = await client.get(config.username);
@@ -146,7 +152,10 @@ export const useSyncStore = createPersistStore(
        try {
           const decompressedValue = await decompress(Buffer.from(remoteState, 'latin1')); // 解压数据 (从latin1解码)
           console.log("[Sync] 云端下载解压缩回来之后localState的内容-粗版", decompressedValue); // 添加这行代码！
+           console.log("[Sync]   解析出的远程 Config Models:", JSON.stringify(parsedRemoteState[StoreKey.Config].models.map(m => m.name)));
           const parsedRemoteState = JSON.parse(decompressedValue) as AppState; // 解析 JSON
+           console.log("[Sync]   解析出的远程 Config Models:", JSON.stringify(parsedRemoteState[StoreKey.Config].models.map(m => m.name)));
+           console.log("[Sync]   解析出的远程 Config customModels:", JSON.stringify(parsedRemoteState[StoreKey.Config].customModels.map(m => m.name)));
            console.log("[Sync] 等待 1 秒...");
             await new Promise(resolve => setTimeout(resolve, 1000));
             console.log("[Sync] 1 秒等待完成.");
@@ -155,10 +164,16 @@ export const useSyncStore = createPersistStore(
           console.log("[Sync] 成功解析 JSON.");
           mergeAppState(localState, parsedRemoteState);
          console.log("[Sync] 成功mergeAppState JSON.");
+         console.log("[Sync]   合并后 (mergeAppState 返回的) Config Models:", JSON.stringify(mergedState[StoreKey.Config].models.map(m => m.name)));
+         console.log("[Sync]   合并后 (mergeAppState 返回的) Config customModels:", JSON.stringify(mergedState[StoreKey.Config].customModels.map(m => m.name)));
           setLocalAppState(localState);
          console.log("[Sync] 成功setLocalAppState JSON.");
       } catch (parseError) {
+         
+         console.error("[Sync] 打印解析出的远程 Config Models 出错", e); 
           console.error("[Sync] Failed to parse remote state:解析失败了！！！！解析失败了！！！！解析失败了！！！！解析失败了！！！！", parseError);
+         console.error("[Sync] 步骤 3b 失败: 解压、解析或合并过程中出错:", parseError);
+        console.warn("[Sync] 由于处理远程状态出错，将放弃合并，保持初始本地状态。");
       }
     }    
     // 2. 再上传本地状态到云端
@@ -181,6 +196,7 @@ export const useSyncStore = createPersistStore(
 
     
   } catch (e) {
+      console.error("[Sync] 打印初始本地 Config Models 出错", e); 
       console.log("[Sync] sync failed 上传失败", e);
       
   }
