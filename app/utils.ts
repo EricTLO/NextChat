@@ -287,8 +287,10 @@ export function isVisionModel(model: string) {
     return true;
   }
   return (
+    true
+    /*临时注释掉
     !EXCLUDE_VISION_MODEL_REGEXES.some((regex) => regex.test(model)) &&
-    VISION_MODEL_REGEXES.some((regex) => regex.test(model))
+    VISION_MODEL_REGEXES.some((regex) => regex.test(model))*/
   );
 }
 
