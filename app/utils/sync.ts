@@ -81,16 +81,21 @@ function mergeConfigState(
   localConfig: ActualAppConfigType,
   remoteConfig: ActualAppConfigType
 ): ActualAppConfigType {
-  console.log("[Merge Config] Merging config state...");
-  console.log("[Merge Config] Local models:", localConfig.models);
-  console.log("[Merge Config] Remote models:", remoteConfig.models);
+  console.log("[Merge Config] === 开始合并 Config 状态 ===");
+  // 只打印模型名称，避免日志过长
+  console.log("[Merge Config] 传入的 Local models:", JSON.stringify(localConfig.models.map(m => m.name)));
+  console.log("[Merge Config] 传入的 Remote models:", JSON.stringify(remoteConfig.models.map(m => m.name)));
+  console.log("[Merge Custom Config] 传入的 Local Custom models:", JSON.stringify(localConfig.customModels.map(m => m.name)));
+  console.log("[Merge Custom Config] 传入的 Remote Custom models:", JSON.stringify(remoteConfig.customModels.map(m => m.name)));
+
+ 
 
   // 1. 先决定其他配置项如何合并 (这里以优先使用远程为例)
   const mergedOtherConfig = { ...localConfig, ...remoteConfig };
 
   // 2. !!! 强制使用本地状态的 models 列表 !!!
   const finalModels = localConfig.models;
-  console.log("[Merge Config] Using local models for final state.");
+  console.log(`[Merge Config] 决定使用 Local models (共 ${finalModels.length} 个)`);
 
   // 3. 决定 lastUpdateTime
   const localUpdateTime = localConfig.lastUpdateTime ?? 0;
@@ -105,8 +110,8 @@ function mergeConfigState(
     models: finalModels,   // 使用本地的模型列表
     lastUpdateTime: finalUpdateTime, // 设置最终的更新时间
   };
-
-  console.log("[Merge Config] Merged config state:", mergedConfig);
+    console.log("[Merge Config] 返回的 Merged models:", JSON.stringify(mergedConfig.models.map(m => m.name)));
+  console.log("[Merge Config] === 结束合并 Config 状态 ===");
   return mergedConfig;
 }
 
