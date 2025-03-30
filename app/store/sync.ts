@@ -171,7 +171,7 @@ export const useSyncStore = createPersistStore(
          console.log("[Sync] 成功setLocalAppState JSON.");
       } catch (parseError) {
          
-         console.error("[Sync] 打印解析出的远程 Config Models 出错", e); 
+         console.error("[Sync] 打印解析出的远程 Config Models 出错", parseError); 
           console.error("[Sync] Failed to parse remote state:解析失败了！！！！解析失败了！！！！解析失败了！！！！解析失败了！！！！", parseError);
          console.error("[Sync] 步骤 3b 失败: 解压、解析或合并过程中出错:", parseError);
         console.warn("[Sync] 由于处理远程状态出错，将放弃合并，保持初始本地状态。");
