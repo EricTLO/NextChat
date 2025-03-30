@@ -152,7 +152,6 @@ export const useSyncStore = createPersistStore(
        try {
           const decompressedValue = await decompress(Buffer.from(remoteState, 'latin1')); // 解压数据 (从latin1解码)
           console.log("[Sync] 云端下载解压缩回来之后localState的内容-粗版", decompressedValue); // 添加这行代码！
-           console.log("[Sync]   解析出的远程 Config Models:", JSON.stringify(parsedRemoteState[StoreKey.Config].models.map(m => m.name)));
           const parsedRemoteState = JSON.parse(decompressedValue) as AppState; // 解析 JSON
            console.log("[Sync]   解析出的远程 Config Models:", JSON.stringify(parsedRemoteState[StoreKey.Config].models.map(m => m.name)));
            console.log("[Sync]   解析出的远程 Config customModels:", JSON.stringify(parsedRemoteState[StoreKey.Config].customModels));
