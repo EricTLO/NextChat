@@ -131,7 +131,7 @@ export const useSyncStore = createPersistStore(
 
   try {
     console.log("[Sync] 初始本地 Config Models:", JSON.stringify(initialLocalState[StoreKey.Config].models.map(m => m.name)));
-    console.log("[Sync] 初始本地 Config Custom Models:", JSON.stringify(initialLocalState[StoreKey.Config].customModels.map(m => m.name)));
+    console.log("[Sync] 初始本地 Config Custom Models:", JSON.stringify(initialLocalState[StoreKey.Config].customModels));
       // 1. 从云端获取远程状态，合并本地
     console.log("[Sync] 先开始从云端获取远程状态...");
     let remoteState = await client.get(config.username);
@@ -155,7 +155,7 @@ export const useSyncStore = createPersistStore(
            console.log("[Sync]   解析出的远程 Config Models:", JSON.stringify(parsedRemoteState[StoreKey.Config].models.map(m => m.name)));
           const parsedRemoteState = JSON.parse(decompressedValue) as AppState; // 解析 JSON
            console.log("[Sync]   解析出的远程 Config Models:", JSON.stringify(parsedRemoteState[StoreKey.Config].models.map(m => m.name)));
-           console.log("[Sync]   解析出的远程 Config customModels:", JSON.stringify(parsedRemoteState[StoreKey.Config].customModels.map(m => m.name)));
+           console.log("[Sync]   解析出的远程 Config customModels:", JSON.stringify(parsedRemoteState[StoreKey.Config].customModels));
            console.log("[Sync] 等待 1 秒...");
             await new Promise(resolve => setTimeout(resolve, 1000));
             console.log("[Sync] 1 秒等待完成.");
@@ -165,7 +165,7 @@ export const useSyncStore = createPersistStore(
           mergeAppState(localState, parsedRemoteState);
          console.log("[Sync] 成功mergeAppState JSON.");
          console.log("[Sync]   合并后 (mergeAppState 返回的) Config Models:", JSON.stringify(mergedState[StoreKey.Config].models.map(m => m.name)));
-         console.log("[Sync]   合并后 (mergeAppState 返回的) Config customModels:", JSON.stringify(mergedState[StoreKey.Config].customModels.map(m => m.name)));
+         console.log("[Sync]   合并后 (mergeAppState 返回的) Config customModels:", JSON.stringify(mergedState[StoreKey.Config].customModels));
           setLocalAppState(localState);
          console.log("[Sync] 成功setLocalAppState JSON.");
       } catch (parseError) {
