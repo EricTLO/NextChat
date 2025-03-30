@@ -85,8 +85,8 @@ function mergeConfigState(
   // 只打印模型名称，避免日志过长
   console.log("[Merge Config] 传入的 Local models:", JSON.stringify(localConfig.models.map(m => m.name)));
   console.log("[Merge Config] 传入的 Remote models:", JSON.stringify(remoteConfig.models.map(m => m.name)));
-  console.log("[Merge Custom Config] 传入的 Local Custom models:", JSON.stringify(localConfig.customModels.map(m => m.name)));
-  console.log("[Merge Custom Config] 传入的 Remote Custom models:", JSON.stringify(remoteConfig.customModels.map(m => m.name)));
+  console.log("[Merge Custom Config] 传入的 Local Custom models:", JSON.stringify(localConfig.customModels));
+  console.log("[Merge Custom Config] 传入的 Remote Custom models:", JSON.stringify(remoteConfig.customModels));
 
  
 
