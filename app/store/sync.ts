@@ -162,6 +162,8 @@ export const useSyncStore = createPersistStore(
            console.log("[Sync] 云端下载解压缩回来之后localState的内容-细版", parsedRemoteState); // 添加这行代码！
           console.log("[Sync] 成功解析 JSON.");
           mergeAppState(localState, parsedRemoteState);
+         // mergeAppState 应该返回一个全新的合并后的状态对象
+        const mergedState = mergeAppState(initialLocalState, parsedRemoteState);
          console.log("[Sync] 成功mergeAppState JSON.");
          console.log("[Sync]   合并后 (mergeAppState 返回的) Config Models:", JSON.stringify(mergedState[StoreKey.Config].models.map(m => m.name)));
          console.log("[Sync]   合并后 (mergeAppState 返回的) Config customModels:", JSON.stringify(mergedState[StoreKey.Config].customModels));
