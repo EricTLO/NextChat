@@ -8,6 +8,8 @@ import { useMaskStore } from "../store/mask";
 import { usePromptStore } from "../store/prompt";
 import { StoreKey } from "../constant";
 import { merge } from "./merge";
+// 导入 Config 状态的类型，假设它叫 AppConfig (你需要根据实际情况调整)
+import { type ChatConfig } from "../store/config"; // 假设 AppConfig 类型在这里
 
 type NonFunctionKeys<T> = {
   [K in keyof T]: T[K] extends (...args: any[]) => any ? never : K;
@@ -67,6 +69,55 @@ type Merger<T extends keyof AppState, U = AppState[T]> = (
 type StateMerger = {
   [K in keyof AppState]: Merger<K>;
 };
+
+
+
+
+//新增函数----------------------------------------------
+// 使用 GetStoreState<typeof useAppConfig> 作为类型
+type ActualAppConfigType = GetStoreState<typeof useAppConfig>;
+
+function mergeConfigState(
+  localConfig: ActualAppConfigType,
+  remoteConfig: ActualAppConfigType
+): ActualAppConfigType {
+  console.log("[Merge Config] Merging config state...");
+  console.log("[Merge Config] Local models:", localConfig.models);
+  console.log("[Merge Config] Remote models:", remoteConfig.models);
+
+  // 1. 先决定其他配置项如何合并 (这里以优先使用远程为例)
+  const mergedOtherConfig = { ...localConfig, ...remoteConfig };
+
+  // 2. !!! 强制使用本地状态的 models 列表 !!!
+  const finalModels = localConfig.models;
+  console.log("[Merge Config] Using local models for final state.");
+
+  // 3. 决定 lastUpdateTime
+  const localUpdateTime = localConfig.lastUpdateTime ?? 0;
+  const remoteUpdateTime = remoteConfig.lastUpdateTime ?? 0;
+  // 取两者中较新的时间，或者直接设为当前时间
+  const finalUpdateTime = Math.max(localUpdateTime, remoteUpdateTime);
+  // 或者总是更新: const finalUpdateTime = Date.now();
+
+  // 4. 组合最终结果
+  const mergedConfig: ActualAppConfigType = {
+    ...mergedOtherConfig, // 包含合并后的其他配置项
+    models: finalModels,   // 使用本地的模型列表
+    lastUpdateTime: finalUpdateTime, // 设置最终的更新时间
+  };
+
+  console.log("[Merge Config] Merged config state:", mergedConfig);
+  return mergedConfig;
+}
+
+
+
+
+
+
+
+
+
 
 // we merge remote state to local state
 //合并策略，这个对象定义了不同状态存储的合并策略。
@@ -140,7 +191,8 @@ const MergeStates: StateMerger = {
     };
     return localState;
   },
-  [StoreKey.Config]: mergeWithUpdate<AppState[StoreKey.Config]>,
+  [StoreKey.Config]: mergeConfigState, // <--- 修改这里
+  //[StoreKey.Config]: mergeWithUpdate<AppState[StoreKey.Config]>,
   [StoreKey.Access]: mergeWithUpdate<AppState[StoreKey.Access]>,
 };
 
