@@ -62,6 +62,7 @@ interface RequestPayload {
   }[];
   stream: boolean; // 添加 stream 属性
   parameters: RequestParam;
+  max_tokens?: number;
 }
 
 export class QwenApi implements LLMApi {
@@ -140,6 +141,7 @@ export class QwenApi implements LLMApi {
         // max_tokens: modelConfig.max_tokens,
         top_p: modelConfig.top_p === 1 ? 0.99 : modelConfig.top_p, // qwen top_p is should be < 1
       },
+      max_tokens: 16384,
     };
 
     const controller = new AbortController();
