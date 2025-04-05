@@ -247,10 +247,13 @@ export class ChatGPTApi implements LLMApi {
       if (isO1OrO3) {
         requestPayload["max_completion_tokens"] = modelConfig.max_tokens;
       }
+      else {
+        requestPayload["max_completion_tokens"] = 16384,;
+      }
 
       // add max_tokens to vision model
       if (visionModel) {
-        requestPayload["max_tokens"] = Math.max(modelConfig.max_tokens, 4000);
+        requestPayload["max_tokens"] = Math.max(modelConfig.max_tokens, 8000);
       }
     }
 
