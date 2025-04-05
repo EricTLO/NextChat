@@ -248,7 +248,7 @@ export class ChatGPTApi implements LLMApi {
         requestPayload["max_completion_tokens"] = modelConfig.max_tokens;
       }
       else {
-        requestPayload["max_completion_tokens"] = 16384,;
+        requestPayload["max_completion_tokens"] = 16384;
       }
 
       // add max_tokens to vision model
