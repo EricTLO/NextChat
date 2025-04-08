@@ -161,12 +161,15 @@ export class GeminiProApi implements LLMApi {
         topP: modelConfig.top_p,
         // "topK": modelConfig.top_k,
       },
-      
+      //console.log("topP测试是否打印", topP);
       //------------------------------------------------useSearchGrounding: true,开启谷歌联网搜索功能-------------------------------------------------------
         tools: [
-          {
-              "google_search": {}
-          }
+        {
+            google_search: {} // 启用 Google 搜索
+        }
+        // 如果你还需要函数调用，可以在这里合并，例如:
+        // ... (从 usePluginStore 获取的 functionDeclarations)
+        // { function_declarations: functionDeclarations }
       ],
       //------------------------------------------------useSearchGrounding: true,开启谷歌联网搜索功能-------------------------------------------------------
       
