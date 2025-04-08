@@ -55,6 +55,12 @@ export interface OpenAIListModelResponse {
 }
 
 
+// 定义 Google 搜索工具的结构
+interface GoogleSearchTool {
+  google_search: {}; // 一个空对象表示启用 Google 搜索
+  // 注意：这里未来可能还可以定义传递给搜索工具的参数，但目前官方示例是空对象
+}
+type Tool = GoogleSearchTool;
 export interface RequestPayload {
   messages: {
     role: "system" | "user" | "assistant";
@@ -70,6 +76,8 @@ export interface RequestPayload {
   max_tokens?: number;
   max_completion_tokens?: number;
   web_search?: boolean; // 添加 web_search 属性
+  tools?: Tool[];
+
 }
 
 
