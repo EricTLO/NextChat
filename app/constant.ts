@@ -611,6 +611,8 @@ const xAIModes = [
   "grok-2-vision-1212",
   "grok-2-vision",
   "grok-2-vision-latest",
+  "grok-3-beta",
+  "grok-3-mini-beta"
 ];
 
 const chatglmModels = [
